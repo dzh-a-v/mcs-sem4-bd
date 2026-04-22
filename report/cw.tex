@@ -380,7 +380,7 @@
 	
 	\newpage
 
-	\section{Проектирование}
+\section{Проектирование}
 
 	В п. 1.4 были перечислены сущности, их атрибуты и домены.
 
@@ -390,22 +390,21 @@
 		\centering
 		\caption{Экзопланета}
 		\small
-		\begin{tabular}{|>{\centering\arraybackslash}p{0.6cm}|>{\RaggedRight\arraybackslash}p{3.5cm}|>{\RaggedRight\arraybackslash}p{2.8cm}|>{\RaggedRight\arraybackslash}p{3.2cm}|>{\centering\arraybackslash}p{1.2cm}|>{\RaggedRight\arraybackslash}p{2.5cm}|}
-			\hline
-			\rowcolor{pastelgreen} № & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка \\
-			\hline
-			1 & Идентификатор & id & VARCHAR(30) & PK & NOT NULL \\
-			2 & Масса & mass & DECIMAL(10,4) & - & NOT NULL \\
-			3 & Радиус & radius & DECIMAL(10,4) & - & NOT NULL \\
-			4 & Орбитальный период & orbital\_period & DECIMAL(10,4) & - & NOT NULL \\
-			5 & Тип планеты & planet\_type & ENUM & - & NOT NULL \\
-			6 & Расстояние & distance & DECIMAL(12,6) & - & NOT NULL \\
-			7 & Дата открытия & discovery\_date & DATE & - & NOT NULL \\
-			8 & Дата последнего наблюдения & last\_observation\_date & DATE & - & NOT NULL \\
-			%9 & Идентификатор звезды & star\_id & VARCHAR(30) & FK & Звезда(id) NOT NULL \\
-			9 & Идентификатор системы & system\_id & VARCHAR(30) & FK & Планетарная\_система(id) NOT NULL \\
-			\hline
-		\end{tabular}
+		\begin{tabular}{|c|p{3.2cm}|p{2.6cm}|p{2.8cm}|c|p{2.5cm}|c|}
+\hline
+№ & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка & Прим. \\
+\hline
+1 & Идентификатор & id & VARCHAR(30) & PK & - & NOT NULL \\
+2 & Масса & mass & DECIMAL(10,4) & - & - & NOT NULL \\
+3 & Радиус & radius & DECIMAL(10,4) & - & - & NOT NULL \\
+4 & Орбитальный период & orbital_period & DECIMAL(10,4) & - & - & NOT NULL \\
+5 & Тип планеты & planet_type & ENUM & - & - & NOT NULL \\
+6 & Расстояние & distance & DECIMAL(12,6) & - & - & NOT NULL \\
+7 & Дата открытия & discovery_date & DATE & - & - & NOT NULL \\
+8 & Дата последнего наблюдения & last_obs_date & DATE & - & - & NOT NULL \\
+9 & Идентификатор системы & system_id & VARCHAR(30) & FK & Планетарная_система(id) & NOT NULL \\
+\hline
+\end{tabular}
 	\end{table}
 
 	\begin{itemize}
@@ -428,18 +427,18 @@
 		\centering
 		\caption{Звезда}
 		\small
-		\begin{tabular}{|>{\centering\arraybackslash}p{0.6cm}|>{\RaggedRight\arraybackslash}p{3.5cm}|>{\RaggedRight\arraybackslash}p{2.8cm}|>{\RaggedRight\arraybackslash}p{3.2cm}|>{\centering\arraybackslash}p{1.2cm}|>{\RaggedRight\arraybackslash}p{2.5cm}|}
-			\hline
-			\rowcolor{pastelgreen} № & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка \\
-			\hline
-			1 & Идентификатор & id & VARCHAR(30) & PK & - NOT NULL \\
-			2 & Спектральный класс & Spectral Class & VARCHAR(5) & - & - NOT NULL \\
-			3 & Масса & mass & DECIMAL(10,4) & - & - NOT NULL \\
-			4 & Радиус & radius & DECIMAL(10,4) & - & - NOT NULL \\
-			5 & Температура поверхности & temperature & INT & - & - NOT NULL \\
-			6 & Расстояние & distance & DECIMAL(16,6) & - & - NOT NULL \\
-			\hline
-		\end{tabular}
+		\begin{tabular}{|c|p{3.2cm}|p{2.6cm}|p{2.8cm}|c|p{2.5cm}|c|}
+\hline
+№ & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка & Прим. \\
+\hline
+1 & Идентификатор & id & VARCHAR(30) & PK & - & NOT NULL \\
+2 & Спектральный класс & spectral_class & VARCHAR(5) & - & - & NOT NULL \\
+3 & Масса & mass & DECIMAL(5,2) & - & - & NOT NULL \\
+4 & Радиус & radius & DECIMAL(10,4) & - & - & NOT NULL \\
+5 & Температура поверхности & temperature & INT & - & - & NOT NULL \\
+6 & Расстояние & distance & DECIMAL(16,6) & - & - & NOT NULL \\
+\hline
+\end{tabular}
 	\end{table}
 
 	\begin{itemize}
@@ -455,18 +454,18 @@
 		\centering
 		\caption{Планетарная система}
 		\small
-		\begin{tabular}{|>{\centering\arraybackslash}p{0.6cm}|>{\RaggedRight\arraybackslash}p{3.5cm}|>{\RaggedRight\arraybackslash}p{2.8cm}|>{\RaggedRight\arraybackslash}p{3.2cm}|>{\centering\arraybackslash}p{1.2cm}|>{\RaggedRight\arraybackslash}p{2.5cm}|}
-			\hline
-			\rowcolor{pastelgreen} № & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка \\
-			\hline
-			1 & Идентификатор & id & VARCHAR(30) & PK & NOT NULL \\
-			2 & Количество подтверждённых планет & confirmed\_planets & INT & - & NOT NULL \\
-			3 & Количество планет в зоне обитаемости & habitable\_planets & INT & - & NOT NULL \\
-			4 & Расстояние & distance & DECIMAL(12,6) & - & NOT NULL \\
-			5 & Идентификатор звезды & star\_id & VARCHAR(30) & FK & Звезда(id) NOT NULL \\
-			6 & Идентификатор звёздной системы & stellar\_system\_id & VARCHAR(30) & FK & Звёздная\_система(id) NOT NULL \\
-			\hline
-		\end{tabular}
+\begin{tabular}{|c|p{3.2cm}|p{2.6cm}|p{2.8cm}|c|p{2.5cm}|c|}
+\hline
+№ & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка & Прим. \\
+\hline
+1 & Идентификатор & id & VARCHAR(30) & PK & - & NOT NULL \\
+2 & Кол-во подтверждённых планет & confirmed_planets & INT & - & - & NOT NULL \\
+3 & Планеты в зоне обитаемости & habitable_planets & INT & - & - & NOT NULL \\
+4 & Расстояние & distance & DECIMAL(12,6) & - & - & NOT NULL \\
+5 & Идентификатор звезды & star_id & VARCHAR(30) & FK & Звезда(id) & NOT NULL \\
+6 & Идентификатор звёздной системы & stellar_sys_id & VARCHAR(30) & FK & Звёздная_система(id) & NOT NULL \\
+\hline
+\end{tabular}
 	\end{table}
 
 	\begin{itemize}
@@ -477,18 +476,18 @@
 		\centering
 		\caption{Звёздная система}
 		\small
-		\begin{tabular}{|>{\centering\arraybackslash}p{0.6cm}|>{\RaggedRight\arraybackslash}p{3.5cm}|>{\RaggedRight\arraybackslash}p{2.8cm}|>{\RaggedRight\arraybackslash}p{3.2cm}|>{\centering\arraybackslash}p{1.2cm}|>{\RaggedRight\arraybackslash}p{2.5cm}|}
-			\hline
-			\rowcolor{pastelgreen} № & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка \\
-			\hline
-			1 & Идентификатор & id & VARCHAR(30) & PK & NOT NULL \\
-			2 & Количество звёзд & stars\_count & INT & - & NOT NULL \\
-			3 & Количество подтверждённых планет & confirmed\_planets & INT & - & NOT NULL \\
-			4 & Количество планет в зоне обитаемости & habitable\_planets & INT & - & NOT NULL \\
-			5 & Расстояние & distance & DECIMAL(12,6) & - & NOT NULL \\
-			6 & Идентификатор скопления & cluster\_id & VARCHAR(30) & FK & Звёздное\_скопление(id) NOT NULL \\
-			\hline
-		\end{tabular}
+\begin{tabular}{|c|p{3.2cm}|p{2.6cm}|p{2.8cm}|c|p{2.5cm}|c|}
+\hline
+№ & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка & Прим. \\
+\hline
+1 & Идентификатор & id & VARCHAR(30) & PK & - & NOT NULL \\
+2 & Количество звёзд & stars_count & INT & - & - & NOT NULL \\
+3 & Подтв. планеты & confirmed_planets & INT & - & - & NOT NULL \\
+4 & Планеты в зоне обитаемости & habitable_planets & INT & - & - & NOT NULL \\
+5 & Расстояние & distance & DECIMAL(12,6) & - & - & NOT NULL \\
+6 & Идентификатор скопления & cluster_id & VARCHAR(30) & FK & Звёздное_скопление(id) & NOT NULL \\
+\hline
+\end{tabular}
 	\end{table}
 
 	\begin{itemize}
@@ -499,17 +498,17 @@
 		\centering
 		\caption{Звёздное скопление}
 		\small
-		\begin{tabular}{|>{\centering\arraybackslash}p{0.6cm}|>{\RaggedRight\arraybackslash}p{3.5cm}|>{\RaggedRight\arraybackslash}p{2.8cm}|>{\RaggedRight\arraybackslash}p{3.2cm}|>{\centering\arraybackslash}p{1.2cm}|>{\RaggedRight\arraybackslash}p{2.5cm}|}
-			\hline
-			\rowcolor{pastelgreen} № & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка \\
-			\hline
-			1 & Идентификатор & id & VARCHAR(30) & PK & NOT NULL \\
-			2 & Количество звёзд & stars\_count & INT & - & NOT NULL \\
-			3 & Количество подтверждённых планет & confirmed\_planets & INT & - & NOT NULL \\
-			4 & Расстояние & distance & DECIMAL(12,6) & - & NOT NULL \\
-			5 & Идентификатор галактики & galaxy\_id & VARCHAR(30) & FK & Галактика(id) NOT NULL \\
-			\hline
-		\end{tabular}
+\begin{tabular}{|c|p{3.2cm}|p{2.6cm}|p{2.8cm}|c|p{2.5cm}|c|}
+\hline
+№ & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка & Прим. \\
+\hline
+1 & Идентификатор & id & VARCHAR(30) & PK & - & NOT NULL \\
+2 & Количество звёзд & stars_count & INT & - & - & NOT NULL \\
+3 & Подтв. планеты & confirmed_planets & INT & - & - & NOT NULL \\
+4 & Расстояние & distance & DECIMAL(12,6) & - & - & NOT NULL \\
+5 & Идентификатор галактики & galaxy_id & VARCHAR(30) & FK & Галактика(id) & NOT NULL \\
+\hline
+\end{tabular}
 	\end{table}
 
 	\begin{itemize}
@@ -520,16 +519,16 @@
 		\centering
 		\caption{Галактика}
 		\small
-		\begin{tabular}{|>{\centering\arraybackslash}p{0.6cm}|>{\RaggedRight\arraybackslash}p{3.5cm}|>{\RaggedRight\arraybackslash}p{2.8cm}|>{\RaggedRight\arraybackslash}p{3.2cm}|>{\centering\arraybackslash}p{1.2cm}|>{\RaggedRight\arraybackslash}p{2.5cm}|}
-			\hline
-			\rowcolor{pastelgreen} № & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка \\
-			\hline
-			1 & Идентификатор & id & VARCHAR(30) & PK & - NOT NULL \\
-			2 & Количество подтверждённых планет & Confirmed Planets & INT & - & - NOT NULL \\
-			3 & Количество планет в зоне обитаемости & Habitable Planets & INT & - & - NOT NULL \\
-			4 & Расстояние & distance & DECIMAL(12,6) & - & - NOT NULL \\
-			\hline
-		\end{tabular}
+\begin{tabular}{|c|p{3.2cm}|p{2.6cm}|p{2.8cm}|c|p{2.5cm}|c|}
+\hline
+№ & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка & Прим. \\
+\hline
+1 & Идентификатор & id & VARCHAR(30) & PK & - & NOT NULL \\
+2 & Подтв. планеты & confirmed_planets & INT & - & - & NOT NULL \\
+3 & Планеты в зоне обитаемости & habitable_planets & INT & - & - & NOT NULL \\
+4 & Расстояние & distance & DECIMAL(12,6) & - & - & NOT NULL \\
+\hline
+\end{tabular}
 	\end{table}
 
 	\begin{itemize}
@@ -540,18 +539,18 @@
 		\centering
 		\caption{Телескоп}
 		\small
-		\begin{tabular}{|>{\centering\arraybackslash}p{0.6cm}|>{\RaggedRight\arraybackslash}p{3.5cm}|>{\RaggedRight\arraybackslash}p{2.8cm}|>{\RaggedRight\arraybackslash}p{3.2cm}|>{\centering\arraybackslash}p{1.2cm}|>{\RaggedRight\arraybackslash}p{2.5cm}|}
-			\hline
-			\rowcolor{pastelgreen} № & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка \\
-			\hline
-			1 & Название телескопа & Name & VARCHAR(47) & PK & - NOT NULL \\
-			2 & Тип & Type & ENUM & - & - NOT NULL \\
-			3 & Диаметр апертуры & Aperture & DECIMAL(6,2) & - & - NOT NULL \\
-			4 & Год ввода в эксплуатацию & Commission Year & INT & - & - NOT NULL \\
-			5 & Организация-оператор & Operator & VARCHAR(81) & - & - NOT NULL \\
-			6 & Количество открытых планет & Discovered Planets & INT & - & - NOT NULL \\
-			\hline
-		\end{tabular}
+\begin{tabular}{|c|p{3.2cm}|p{2.6cm}|p{2.8cm}|c|p{2.5cm}|c|}
+\hline
+№ & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка & Прим. \\
+\hline
+1 & Название телескопа & name & VARCHAR(47) & PK & - & NOT NULL \\
+2 & Тип & type & ENUM & - & - & NOT NULL \\
+3 & Диаметр апертуры & aperture & DECIMAL(6,2) & - & - & NOT NULL \\
+4 & Год ввода & comm_year & INT & - & - & NOT NULL \\
+5 & Организация & operator & VARCHAR(81) & - & - & NOT NULL \\
+6 & Открытые планеты & discovered_planets & INT & - & - & NOT NULL \\
+\hline
+\end{tabular}
 	\end{table}
 
 	\begin{itemize}
@@ -570,16 +569,16 @@
 		\centering
 		\caption{Наблюдатель}
 		\small
-		\begin{tabular}{|>{\centering\arraybackslash}p{0.6cm}|>{\RaggedRight\arraybackslash}p{3.5cm}|>{\RaggedRight\arraybackslash}p{2.8cm}|>{\RaggedRight\arraybackslash}p{3.2cm}|>{\centering\arraybackslash}p{1.2cm}|>{\RaggedRight\arraybackslash}p{2.5cm}|}
-			\hline
-			\rowcolor{pastelgreen} № & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка \\
-			\hline
-			1 & Идентификатор & id & VARCHAR(100) & PK & - NOT NULL \\
-			2 & Дата рождения/основания & Birth Date & DATE & - & - NOT NULL \\
-			3 & Страна & Country & VARCHAR(56) & - & - NOT NULL \\
-			4 & Количество открытий & Discoveries & INT & - & - NOT NULL \\
-			\hline
-		\end{tabular}
+\begin{tabular}{|c|p{3.2cm}|p{2.6cm}|p{2.8cm}|c|p{2.5cm}|c|}
+\hline
+№ & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка & Прим. \\
+\hline
+1 & Идентификатор & id & VARCHAR(100) & PK & - & NOT NULL \\
+2 & Дата рождения & birth_date & DATE & - & - & NOT NULL \\
+3 & Страна & country & VARCHAR(56) & - & - & NOT NULL \\
+4 & Количество открытий & discoveries & INT & - & - & NOT NULL \\
+\hline
+\end{tabular}
 	\end{table}
 
 	\begin{itemize}
@@ -592,17 +591,17 @@
 		\centering
 		\caption{Наблюдение}
 		\small
-		\begin{tabular}{|>{\centering\arraybackslash}p{0.6cm}|>{\RaggedRight\arraybackslash}p{3.5cm}|>{\RaggedRight\arraybackslash}p{2.8cm}|>{\RaggedRight\arraybackslash}p{3.2cm}|>{\centering\arraybackslash}p{1.2cm}|>{\RaggedRight\arraybackslash}p{2.5cm}|}
-			\hline
-			\rowcolor{pastelgreen} № & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка \\
-			\hline
-			1 & Идентификатор & id & VARCHAR(30) & PK & NOT NULL \\
-			2 & Экзопланета & exoplanet\_id & VARCHAR(30) & FK & Экзопланета(id) NOT NULL \\
-			3 & Телескоп & telescope\_name & VARCHAR(47) & FK & Телескоп(Name) NOT NULL \\
-			4 & Наблюдатель & observer\_id & VARCHAR(100) & FK & Наблюдатель(id) NOT NULL \\
-			5 & Дата наблюдения & observation\_date & DATE & - & NOT NULL \\
-			\hline
-		\end{tabular}
+\begin{tabular}{|c|p{3.2cm}|p{2.6cm}|p{2.8cm}|c|p{2.5cm}|c|}
+\hline
+№ & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка & Прим. \\
+\hline
+1 & Идентификатор & id & VARCHAR(30) & PK & - & NOT NULL \\
+2 & Экзопланета & exoplanet_id & VARCHAR(30) & FK & Экзопланета(id) & NOT NULL \\
+3 & Телескоп & telescope_name & VARCHAR(47) & FK & Телескоп(name) & NOT NULL \\
+4 & Наблюдатель & observer_id & VARCHAR(100) & FK & Наблюдатель(id) & NOT NULL \\
+5 & Дата наблюдения & observation_date & DATE & - & - & NOT NULL \\
+\hline
+\end{tabular}
 	\end{table}
 
 	\begin{itemize}
@@ -611,7 +610,7 @@
 
 	\newpage
 	
-	\begin{thebibliography}{9}
+\begin{thebibliography}{9}
 		\bibitem{exoplanet} NASA. Exoplanets - NASA Science [Электронный ресурс] / Chelsea Gohd, Diana Logreira --- URL: \url{https://science.nasa.gov/exoplanets/} (дата обращения: 05.02.2026).
 		
 		\bibitem{planet} NASA. What is a Planet? [Электронный ресурс] / Stephen Carney, Diana Logreira --- URL: \url{https://science.nasa.gov/solar-system/planets/what-is-a-planet/} (дата обращения: 05.02.2026).
