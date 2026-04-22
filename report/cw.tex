@@ -434,14 +434,16 @@
 			\hline
 			\rowcolor{pastelgreen} № & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка \\
 			\hline
-			1 & Идентификатор & id & VARCHAR(30) & PK & - NOT NULL \\
-			2 & Масса & mass & DECIMAL(10,4) & - & - NOT NULL \\
-			3 & Радиус & radius & DECIMAL(10,4) & - & - NOT NULL \\
-			4 & Орбитальный период & orbital period & DECIMAL(10,4) & - & - NOT NULL \\
-			5 & Тип планеты & planet type & ENUM & - & - NOT NULL \\
-			6 & Расстояние & distance & DECIMAL(12,6) & - & - NOT NULL \\
-			7 & Дата открытия & discovery date & DATE & - & - NOT NULL \\
-			8 & Дата последнего наблюдения & last observation date & DATE & - & - NOT NULL \\
+			1 & Идентификатор & id & VARCHAR(30) & PK & NOT NULL \\
+			2 & Масса & mass & DECIMAL(10,4) & - & NOT NULL \\
+			3 & Радиус & radius & DECIMAL(10,4) & - & NOT NULL \\
+			4 & Орбитальный период & orbital\_period & DECIMAL(10,4) & - & NOT NULL \\
+			5 & Тип планеты & planet\_type & ENUM & - & NOT NULL \\
+			6 & Расстояние & distance & DECIMAL(12,6) & - & NOT NULL \\
+			7 & Дата открытия & discovery\_date & DATE & - & NOT NULL \\
+			8 & Дата последнего наблюдения & last\_observation\_date & DATE & - & NOT NULL \\
+			9 & Идентификатор звезды & star\_id & VARCHAR(30) & FK & Звезда(id) NOT NULL \\
+			10 & Идентификатор системы & system\_id & VARCHAR(30) & FK & Планетарная\_система(id) NOT NULL \\
 			\hline
 		\end{tabular}
 	\end{table}
@@ -472,10 +474,12 @@
 			\hline
 			\rowcolor{pastelgreen} № & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка \\
 			\hline
-			1 & Идентификатор & id & VARCHAR(30) & PK & - NOT NULL \\
-			2 & Количество подтверждённых планет & Confirmed Planets & INT & - & - NOT NULL \\
-			3 & Количество планет в зоне обитаемости & Habitable Planets & INT & - & - NOT NULL \\
-			4 & Расстояние & distance & DECIMAL(12,6) & - & - NOT NULL \\
+			1 & Идентификатор & id & VARCHAR(30) & PK & NOT NULL \\
+			2 & Количество подтверждённых планет & confirmed\_planets & INT & - & NOT NULL \\
+			3 & Количество планет в зоне обитаемости & habitable\_planets & INT & - & NOT NULL \\
+			4 & Расстояние & distance & DECIMAL(12,6) & - & NOT NULL \\
+			5 & Идентификатор звезды & star\_id & VARCHAR(30) & FK & Звезда(id) NOT NULL \\
+			6 & Идентификатор звёздной системы & stellar\_system\_id & VARCHAR(30) & FK & Звёздная\_система(id) NOT NULL \\
 			\hline
 		\end{tabular}
 	\end{table}
@@ -488,11 +492,12 @@
 			\hline
 			\rowcolor{pastelgreen} № & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка \\
 			\hline
-			1 & Идентификатор & id & VARCHAR(30) & PK & - NOT NULL \\
-			2 & Количество звёзд & Stars Count & INT & - & - NOT NULL \\
-			3 & Количество подтверждённых планет & Confirmed Planets & INT & - & - NOT NULL \\
-			4 & Количество планет в зоне обитаемости & Habitable Planets & INT & - & - NOT NULL \\
-			5 & Расстояние & distance & DECIMAL(12,6) & - & - NOT NULL \\
+			1 & Идентификатор & id & VARCHAR(30) & PK & NOT NULL \\
+			2 & Количество звёзд & stars\_count & INT & - & NOT NULL \\
+			3 & Количество подтверждённых планет & confirmed\_planets & INT & - & NOT NULL \\
+			4 & Количество планет в зоне обитаемости & habitable\_planets & INT & - & NOT NULL \\
+			5 & Расстояние & distance & DECIMAL(12,6) & - & NOT NULL \\
+			6 & Идентификатор скопления & cluster\_id & VARCHAR(30) & FK & Звёздное\_скопление(id) NOT NULL \\
 			\hline
 		\end{tabular}
 	\end{table}
@@ -505,10 +510,11 @@
 			\hline
 			\rowcolor{pastelgreen} № & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка \\
 			\hline
-			1 & Идентификатор & id & VARCHAR(30) & PK & - NOT NULL \\
-			2 & Количество звёзд & Stars Count & INT & - & - NOT NULL \\
-			3 & Количество подтверждённых планет & Confirmed Planets & INT & - & - NOT NULL \\
-			4 & Расстояние & distance & DECIMAL(12,6) & - & - NOT NULL \\
+			1 & Идентификатор & id & VARCHAR(30) & PK & NOT NULL \\
+			2 & Количество звёзд & stars\_count & INT & - & NOT NULL \\
+			3 & Количество подтверждённых планет & confirmed\_planets & INT & - & NOT NULL \\
+			4 & Расстояние & distance & DECIMAL(12,6) & - & NOT NULL \\
+			5 & Идентификатор галактики & galaxy\_id & VARCHAR(30) & FK & Галактика(id) NOT NULL \\
 			\hline
 		\end{tabular}
 	\end{table}
@@ -563,6 +569,22 @@
 		\end{tabular}
 	\end{table}
 
+	\begin{table}[H]
+		\centering
+		\caption{Наблюдение}
+		\small
+		\begin{tabular}{|>{\centering\arraybackslash}p{0.6cm}|>{\RaggedRight\arraybackslash}p{3.5cm}|>{\RaggedRight\arraybackslash}p{2.8cm}|>{\RaggedRight\arraybackslash}p{3.2cm}|>{\centering\arraybackslash}p{1.2cm}|>{\RaggedRight\arraybackslash}p{2.5cm}|}
+			\hline
+			\rowcolor{pastelgreen} № & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка \\
+			\hline
+			1 & Идентификатор & id & VARCHAR(30) & PK & NOT NULL \\
+			2 & Экзопланета & exoplanet\_id & VARCHAR(30) & FK & Экзопланета(id) NOT NULL \\
+			3 & Телескоп & telescope\_name & VARCHAR(47) & FK & Телескоп(Name) NOT NULL \\
+			4 & Наблюдатель & observer\_id & VARCHAR(100) & FK & Наблюдатель(id) NOT NULL \\
+			5 & Дата наблюдения & observation\_date & DATE & - & NOT NULL \\
+			\hline
+		\end{tabular}
+	\end{table}
 
 	\newpage
 	
