@@ -6,9 +6,13 @@
 --
 -- This file does not insert data and does not execute analytical queries.
 
+-- Creates a separate namespace for all coursework objects.
 CREATE SCHEMA exoplanet_catalog;
+
+-- Makes the new schema the default target for the following commands.
 SET search_path TO exoplanet_catalog, public;
 
+-- Stores allowed exoplanet categories.
 CREATE TYPE planet_type AS ENUM (
     'gas_giant',
     'neptunian',
@@ -16,11 +20,13 @@ CREATE TYPE planet_type AS ENUM (
     'terrestial'
 );
 
+-- Stores allowed telescope categories.
 CREATE TYPE telescope_type AS ENUM (
     'space',
     'ground'
 );
 
+-- Defines a common identifier format for most astronomical objects.
 CREATE DOMAIN object_id AS VARCHAR(30)
     CHECK (
         VALUE = btrim(VALUE)
@@ -28,6 +34,7 @@ CREATE DOMAIN object_id AS VARCHAR(30)
         AND VALUE ~ '^[A-Za-z0-9.+ _-]+$'
     );
 
+-- Defines a longer identifier format for observers.
 CREATE DOMAIN observer_id AS VARCHAR(100)
     CHECK (
         VALUE = btrim(VALUE)
@@ -35,6 +42,7 @@ CREATE DOMAIN observer_id AS VARCHAR(100)
         AND VALUE ~ '^[A-Za-z0-9.+ _/-]+$'
     );
 
+-- Defines a validated text format for telescope operators.
 CREATE DOMAIN operator_name AS VARCHAR(81)
     CHECK (
         VALUE = btrim(VALUE)
@@ -42,6 +50,7 @@ CREATE DOMAIN operator_name AS VARCHAR(81)
         AND VALUE ~ '^[A-Za-z0-9.+ _/-]+$'
     );
 
+-- Defines a validated text format for country names.
 CREATE DOMAIN country_name AS VARCHAR(56)
     CHECK (
         VALUE = btrim(VALUE)
@@ -49,11 +58,13 @@ CREATE DOMAIN country_name AS VARCHAR(56)
         AND VALUE ~ '^[A-Za-z0-9.+ _-]+$'
     );
 
+-- Defines the expected stellar spectral class format.
 CREATE DOMAIN spectral_class AS VARCHAR(5)
     CHECK (
         VALUE ~ '^[OBAFGKMWLD][0-9](III|II|IV|I|V)$'
     );
 
+-- Stores galaxies at the top of the object hierarchy.
 CREATE TABLE galaxy (
     id object_id PRIMARY KEY,
     conf_plan INT NOT NULL CHECK (conf_plan >= 0),
@@ -61,6 +72,7 @@ CREATE TABLE galaxy (
     dist DECIMAL(12, 6) NOT NULL CHECK (dist >= 0)
 );
 
+-- Stores stellar clusters and links each one to a galaxy.
 CREATE TABLE stellar_cluster (
     id object_id PRIMARY KEY,
     stars_count INT NOT NULL CHECK (stars_count >= 10),
@@ -72,6 +84,7 @@ CREATE TABLE stellar_cluster (
         ON DELETE RESTRICT
 );
 
+-- Stores stellar systems and links each one to a stellar cluster.
 CREATE TABLE stellar_system (
     id object_id PRIMARY KEY,
     stars_count INT NOT NULL CHECK (stars_count >= 1),
@@ -83,6 +96,7 @@ CREATE TABLE stellar_system (
         ON DELETE RESTRICT
 );
 
+-- Stores physical parameters of stars.
 CREATE TABLE star (
     id object_id PRIMARY KEY,
     class spectral_class NOT NULL,
@@ -92,6 +106,7 @@ CREATE TABLE star (
     dist DECIMAL(16, 6) NOT NULL CHECK (dist >= 0)
 );
 
+-- Stores planetary systems and links them to stars and stellar systems.
 CREATE TABLE planetary_system (
     id object_id PRIMARY KEY,
     conf_plan INT NOT NULL CHECK (conf_plan >= 1),
@@ -105,6 +120,7 @@ CREATE TABLE planetary_system (
         ON DELETE RESTRICT
 );
 
+-- Stores exoplanets and links each planet to a planetary system.
 CREATE TABLE exoplanet (
     id object_id PRIMARY KEY,
     mass DECIMAL(10, 4) NOT NULL CHECK (mass > 0),
@@ -119,6 +135,7 @@ CREATE TABLE exoplanet (
         ON DELETE RESTRICT
 );
 
+-- Stores telescopes used for detecting or observing exoplanets.
 CREATE TABLE telescope (
     id object_id PRIMARY KEY,
     type telescope_type NOT NULL,
@@ -128,6 +145,7 @@ CREATE TABLE telescope (
     discov_plan INT NOT NULL CHECK (discov_plan >= 0)
 );
 
+-- Stores observers or organizations that perform observations.
 CREATE TABLE observer (
     id observer_id PRIMARY KEY,
     bday DATE NOT NULL CHECK (bday BETWEEN DATE '1609-01-01' AND CURRENT_DATE),
@@ -135,6 +153,7 @@ CREATE TABLE observer (
     discovs INT NOT NULL CHECK (discovs >= 0)
 );
 
+-- Stores observation events and links planets, telescopes, and observers.
 CREATE TABLE observation (
     id object_id PRIMARY KEY,
     exo_id object_id NOT NULL REFERENCES exoplanet(id)
@@ -150,6 +169,7 @@ CREATE TABLE observation (
     CONSTRAINT observation_unique_event UNIQUE (exo_id, tele_name, obs_id, obs_date)
 );
 
+-- Creates indexes for foreign keys used in joins.
 CREATE INDEX idx_stellar_cluster_galaxy_id ON stellar_cluster(galaxy_id);
 CREATE INDEX idx_stellar_system_cluster_id ON stellar_system(cluster_id);
 CREATE INDEX idx_planetary_system_star_id ON planetary_system(star_id);
@@ -159,4 +179,5 @@ CREATE INDEX idx_observation_exo_id ON observation(exo_id);
 CREATE INDEX idx_observation_tele_name ON observation(tele_name);
 CREATE INDEX idx_observation_obs_id ON observation(obs_id);
 
+-- Adds a human-readable description to the schema.
 COMMENT ON SCHEMA exoplanet_catalog IS 'Coursework database schema for exoplanet cataloging.';
