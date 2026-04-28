@@ -109,6 +109,6 @@ SELECT
     ne.id,
     'Synthetic Telescope ' || lpad((((ne.rn + obs_no - 1) % 10) + 1)::text, 2, '0'),
     'Observer ' || lpad((((ne.rn + obs_no - 1) % 10) + 1)::text, 2, '0'),
-    LEAST(ne.last_obs_date, ne.discovery_date + ((obs_no * 90) + (ne.rn % 30)))
+    LEAST(ne.last_obs_date, ne.discovery_date + (((obs_no * 90) + (ne.rn % 30))::INT))
 FROM numbered_exoplanets AS ne
 CROSS JOIN generate_series(1, 4) AS obs_no;
