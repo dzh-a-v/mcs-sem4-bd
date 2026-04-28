@@ -1,35 +1,27 @@
-# PostgreSQL Database
+# PostgreSQL Schema
 
-This folder contains a PostgreSQL implementation of the coursework database for exoplanet cataloging.
+Current coursework checkpoint: show the updated table diagram and the SQL schema file.
 
-Files:
+Main file:
 
-- `schema.sql` creates the `exoplanet_catalog` schema, all tables, constraints, indexes, and two convenience views.
-- `seed.sql` inserts a small readable dataset based on real-looking astronomical objects from the report.
-- `generate_large_dataset.sql` inserts a synthetic dataset with `280530` rows in total, which covers the coursework requirement for a database with at least `250000` records.
-- `queries.sql` contains example analytical queries you can run after loading either dataset.
-- `QUERY_GUIDE_EN.md` and `QUERY_GUIDE_RU.md` explain how to query the database in English and Russian.
+- `schema.sql` creates the `exoplanet_catalog` schema, enum types, domains, tables, primary keys, foreign keys, checks, and indexes.
 
-Recommended run order:
+The schema file does not insert data and does not execute queries.
+
+To create the empty database structure:
 
 ```bash
 createdb exoplanet_coursework
 psql -d exoplanet_coursework -f program/schema.sql
-psql -d exoplanet_coursework -f program/seed.sql
-psql -d exoplanet_coursework -f program/queries.sql
 ```
 
-If you need the large synthetic dataset instead of the small sample:
+Older helper files from the previous stage:
 
-```bash
-createdb exoplanet_coursework
-psql -d exoplanet_coursework -f program/schema.sql
-psql -d exoplanet_coursework -f program/generate_large_dataset.sql
-psql -d exoplanet_coursework -f program/queries.sql
-```
+- `seed.sql` inserts a small dataset.
+- `generate_large_dataset.sql` inserts a synthetic large dataset.
+- `queries.sql` contains example analytical queries.
+- `QUERY_GUIDE_EN.md` and `QUERY_GUIDE_RU.md` explain how to query the database.
 
-Notes:
-
-- The schema names and table names are kept in lowercase snake_case for PostgreSQL ergonomics.
-- The enum value `terrestial` intentionally matches the spelling used in the coursework text.
-- The report models the `exoplanet -> star` relation conceptually, while the tables model it through `planetary_system`. The view `v_exoplanet_catalog` resolves that join for convenient querying.
+For the current teacher check, these files are not required. Because `schema.sql`
+now follows the updated table diagram with shortened column names, the older
+data and query scripts should be updated before running them again.
