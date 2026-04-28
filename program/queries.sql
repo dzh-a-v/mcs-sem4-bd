@@ -1,3 +1,12 @@
+-- queries.sql
+--
+-- Contains ready-to-run analytical SELECT queries for the coursework
+-- database. It does not create, update, or delete data.
+--
+-- Run this after loading either seed.sql or generate_large_dataset.sql.
+-- The queries demonstrate hierarchy lookup, filters, grouping, aggregation,
+-- and observation summaries.
+
 SET search_path TO exoplanet_catalog, public;
 
 -- 1. Full catalog slice with hierarchy and host-star metadata.

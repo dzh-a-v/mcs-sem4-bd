@@ -8,6 +8,7 @@ Files:
 - `seed.sql` inserts a small readable dataset based on real-looking astronomical objects from the report.
 - `generate_large_dataset.sql` inserts a synthetic dataset with `280530` rows in total, which covers the coursework requirement for a database with at least `250000` records.
 - `queries.sql` contains example analytical queries you can run after loading either dataset.
+- `QUERY_GUIDE_EN.md` and `QUERY_GUIDE_RU.md` explain how to query the database in English and Russian.
 
 Recommended run order:
 

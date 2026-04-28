@@ -1,3 +1,15 @@
+-- schema.sql
+--
+-- Creates the PostgreSQL structure for the coursework database.
+-- Run this file first in an empty database.
+--
+-- It creates:
+-- - schema: exoplanet_catalog
+-- - enum types for planet and telescope categories
+-- - reusable domains for validated identifiers and names
+-- - all coursework tables, primary keys, foreign keys, checks, and indexes
+-- - helper views for catalog and observation queries
+
 CREATE SCHEMA exoplanet_catalog;
 SET search_path TO exoplanet_catalog, public;
 

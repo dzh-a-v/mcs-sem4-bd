@@ -1,3 +1,24 @@
+-- generate_large_dataset.sql
+--
+-- Inserts a large synthetic dataset into the schema created by schema.sql.
+-- Use this file when the coursework needs a database with at least 250000
+-- records and when you want to test aggregation, filtering, and joins on
+-- larger tables.
+--
+-- Generated row counts:
+-- - galaxy: 10
+-- - stellar_cluster: 500
+-- - stellar_system: 10000
+-- - star: 10000
+-- - planetary_system: 10000
+-- - exoplanet: 50000
+-- - telescope: 10
+-- - observer: 10
+-- - observation: 200000
+-- - total: 280530
+--
+-- Run this instead of seed.sql in a fresh database.
+
 SET search_path TO exoplanet_catalog, public;
 
 INSERT INTO galaxy (id, confirmed_planets, habitable_planets, distance)

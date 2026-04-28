@@ -1,3 +1,14 @@
+-- seed.sql
+--
+-- Inserts a small, readable demonstration dataset into the schema created by
+-- schema.sql. Use this file when you want quick manual testing, simple query
+-- examples, or human-friendly records for showing how the database works.
+--
+-- Run order:
+-- 1. schema.sql
+-- 2. seed.sql
+-- 3. queries.sql, or your own SELECT queries
+
 SET search_path TO exoplanet_catalog, public;
 
 INSERT INTO galaxy (id, confirmed_planets, habitable_planets, distance) VALUES
