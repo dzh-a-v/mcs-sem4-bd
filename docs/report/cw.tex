@@ -382,6 +382,8 @@
 
 \section{Проектирование}
 
+\subsection{Таблицы с описанием таблиц базы данных}
+
 	В п. 1.4 были перечислены сущности, их атрибуты и домены.
 
 	В следующих таблицах указаны метаданные полученной базы данных и обоснования доменов аттрибутов.
@@ -397,12 +399,12 @@
 1 & Идентификатор & id & VARCHAR(30) & PK & - & NOT NULL \\
 2 & Масса & mass & DECIMAL(10,4) & - & - & NOT NULL \\
 3 & Радиус & radius & DECIMAL(10,4) & - & - & NOT NULL \\
-4 & Орбитальный период & orbital_period & DECIMAL(10,4) & - & - & NOT NULL \\
-5 & Тип планеты & planet_type & ENUM & - & - & NOT NULL \\
+4 & Орбитальный период & orbital\_period & DECIMAL(10,4) & - & - & NOT NULL \\
+5 & Тип планеты & planet\_type & ENUM & - & - & NOT NULL \\
 6 & Расстояние & distance & DECIMAL(12,6) & - & - & NOT NULL \\
-7 & Дата открытия & discovery_date & DATE & - & - & NOT NULL \\
-8 & Дата последнего наблюдения & last_obs_date & DATE & - & - & NOT NULL \\
-9 & Идентификатор системы & system_id & VARCHAR(30) & FK & Планетарная_система(id) & NOT NULL \\
+7 & Дата открытия & discovery\_date & DATE & - & - & NOT NULL \\
+8 & Дата последнего наблюдения & last\_obs\_date & DATE & - & - & NOT NULL \\
+9 & Идентификатор системы & system\_id & VARCHAR(30) & FK & Планетарная\_система(id) & NOT NULL \\
 \hline
 \end{tabular}
 	\end{table}
@@ -432,7 +434,7 @@
 № & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка & Прим. \\
 \hline
 1 & Идентификатор & id & VARCHAR(30) & PK & - & NOT NULL \\
-2 & Спектральный класс & spectral_class & VARCHAR(5) & - & - & NOT NULL \\
+2 & Спектральный класс & spectral\_class & VARCHAR(5) & - & - & NOT NULL \\
 3 & Масса & mass & DECIMAL(5,2) & - & - & NOT NULL \\
 4 & Радиус & radius & DECIMAL(10,4) & - & - & NOT NULL \\
 5 & Температура поверхности & temperature & INT & - & - & NOT NULL \\
@@ -459,11 +461,11 @@
 № & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка & Прим. \\
 \hline
 1 & Идентификатор & id & VARCHAR(30) & PK & - & NOT NULL \\
-2 & Кол-во подтверждённых планет & confirmed_planets & INT & - & - & NOT NULL \\
-3 & Планеты в зоне обитаемости & habitable_planets & INT & - & - & NOT NULL \\
+2 & Кол-во подтверждённых планет & confirmed\_planets & INT & - & - & NOT NULL \\
+3 & Планеты в зоне обитаемости & habitable\_planets & INT & - & - & NOT NULL \\
 4 & Расстояние & distance & DECIMAL(12,6) & - & - & NOT NULL \\
-5 & Идентификатор звезды & star_id & VARCHAR(30) & FK & Звезда(id) & NOT NULL \\
-6 & Идентификатор звёздной системы & stellar_sys_id & VARCHAR(30) & FK & Звёздная_система(id) & NOT NULL \\
+5 & Идентификатор звезды & star\_id & VARCHAR(30) & FK & Звезда(id) & NOT NULL \\
+6 & Идентификатор звёздной системы & stellar\_sys\_id & VARCHAR(30) & FK & Звёздная\_система(id) & NOT NULL \\
 \hline
 \end{tabular}
 	\end{table}
@@ -481,11 +483,11 @@
 № & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка & Прим. \\
 \hline
 1 & Идентификатор & id & VARCHAR(30) & PK & - & NOT NULL \\
-2 & Количество звёзд & stars_count & INT & - & - & NOT NULL \\
-3 & Подтв. планеты & confirmed_planets & INT & - & - & NOT NULL \\
-4 & Планеты в зоне обитаемости & habitable_planets & INT & - & - & NOT NULL \\
+2 & Количество звёзд & stars\_count & INT & - & - & NOT NULL \\
+3 & Подтв. планеты & confirmed\_planets & INT & - & - & NOT NULL \\
+4 & Планеты в зоне обитаемости & habitable\_planets & INT & - & - & NOT NULL \\
 5 & Расстояние & distance & DECIMAL(12,6) & - & - & NOT NULL \\
-6 & Идентификатор скопления & cluster_id & VARCHAR(30) & FK & Звёздное_скопление(id) & NOT NULL \\
+6 & Идентификатор скопления & cluster\_id & VARCHAR(30) & FK & Звёздное\_скопление(id) & NOT NULL \\
 \hline
 \end{tabular}
 	\end{table}
@@ -503,10 +505,10 @@
 № & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка & Прим. \\
 \hline
 1 & Идентификатор & id & VARCHAR(30) & PK & - & NOT NULL \\
-2 & Количество звёзд & stars_count & INT & - & - & NOT NULL \\
-3 & Подтв. планеты & confirmed_planets & INT & - & - & NOT NULL \\
+2 & Количество звёзд & stars\_count & INT & - & - & NOT NULL \\
+3 & Подтв. планеты & confirmed\_planets & INT & - & - & NOT NULL \\
 4 & Расстояние & distance & DECIMAL(12,6) & - & - & NOT NULL \\
-5 & Идентификатор галактики & galaxy_id & VARCHAR(30) & FK & Галактика(id) & NOT NULL \\
+5 & Идентификатор галактики & galaxy\_id & VARCHAR(30) & FK & Галактика(id) & NOT NULL \\
 \hline
 \end{tabular}
 	\end{table}
@@ -524,8 +526,8 @@
 № & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка & Прим. \\
 \hline
 1 & Идентификатор & id & VARCHAR(30) & PK & - & NOT NULL \\
-2 & Подтв. планеты & confirmed_planets & INT & - & - & NOT NULL \\
-3 & Планеты в зоне обитаемости & habitable_planets & INT & - & - & NOT NULL \\
+2 & Подтв. планеты & confirmed\_planets & INT & - & - & NOT NULL \\
+3 & Планеты в зоне обитаемости & habitable\_planets & INT & - & - & NOT NULL \\
 4 & Расстояние & distance & DECIMAL(12,6) & - & - & NOT NULL \\
 \hline
 \end{tabular}
@@ -546,9 +548,9 @@
 1 & Название телескопа & name & VARCHAR(47) & PK & - & NOT NULL \\
 2 & Тип & type & ENUM & - & - & NOT NULL \\
 3 & Диаметр апертуры & aperture & DECIMAL(6,2) & - & - & NOT NULL \\
-4 & Год ввода & comm_year & INT & - & - & NOT NULL \\
+4 & Год ввода & comm\_year & INT & - & - & NOT NULL \\
 5 & Организация & operator & VARCHAR(81) & - & - & NOT NULL \\
-6 & Открытые планеты & discovered_planets & INT & - & - & NOT NULL \\
+6 & Открытые планеты & discovered\_planets & INT & - & - & NOT NULL \\
 \hline
 \end{tabular}
 	\end{table}
@@ -561,8 +563,7 @@
 	текущего года.
 		\item Организация-оператор телескопа ограничена 81 символами. Самое длинное название организации-оператора
 		телескопа: \textit{European Southern Observatory for Astronomical Research in the Southern Hemisphere}.
-		\item Типы телескопов хранятся как \textit{ENUM}, их значения: \{космический,
-	наземный\}.
+		\item Типы телескопов хранятся как \textit{ENUM}, их значения: \{космический, наземный\}.
 	\end{itemize}
 
 	\begin{table}[H]
@@ -574,7 +575,7 @@
 № & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка & Прим. \\
 \hline
 1 & Идентификатор & id & VARCHAR(100) & PK & - & NOT NULL \\
-2 & Дата рождения & birth_date & DATE & - & - & NOT NULL \\
+2 & Дата рождения & birth\_date & DATE & - & - & NOT NULL \\
 3 & Страна & country & VARCHAR(56) & - & - & NOT NULL \\
 4 & Количество открытий & discoveries & INT & - & - & NOT NULL \\
 \hline
@@ -596,10 +597,10 @@
 № & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка & Прим. \\
 \hline
 1 & Идентификатор & id & VARCHAR(30) & PK & - & NOT NULL \\
-2 & Экзопланета & exoplanet_id & VARCHAR(30) & FK & Экзопланета(id) & NOT NULL \\
-3 & Телескоп & telescope_name & VARCHAR(47) & FK & Телескоп(name) & NOT NULL \\
-4 & Наблюдатель & observer_id & VARCHAR(100) & FK & Наблюдатель(id) & NOT NULL \\
-5 & Дата наблюдения & observation_date & DATE & - & - & NOT NULL \\
+2 & Экзопланета & exoplanet\_id & VARCHAR(30) & FK & Экзопланета(id) & NOT NULL \\
+3 & Телескоп & telescope\_name & VARCHAR(47) & FK & Телескоп(name) & NOT NULL \\
+4 & Наблюдатель & observer\_id & VARCHAR(100) & FK & Наблюдатель(id) & NOT NULL \\
+5 & Дата наблюдения & observation\_date & DATE & - & - & NOT NULL \\
 \hline
 \end{tabular}
 	\end{table}
@@ -609,6 +610,32 @@
 	\end{itemize}
 
 	\newpage
+
+\subsection{Лингвистическое описание схемы базы данных}
+
+\begin{enumerate}
+    \item Галактика (galaxy\_id(VARCHAR(30)), conf\_plan(INT), hab\_plan(INT), dist(DECIMAL(12, 6))).
+
+    \item Звёздное скопление (cluster\_id(VARCHAR(30)), stars\_count(INT), conf\_plan(INT), hab\_plan(INT), dist(DECIMAL(12, 6)), galaxy\_id(VARCHAR(30))).
+
+    \item Звёздная система (stellar\_id(VARCHAR(30)), stars\_count(INT), conf\_plan(INT), hab\_plan(INT), dist(DECIMAL(12, 6)), cluster\_id(VARCHAR(30))).
+
+    \item Планетарная система (system\_id(VARCHAR(30)), conf\_plan(INT), hab\_plan(INT), distance(DECIMAL(12, 6)), stell\_sys\_id(VARCHAR(30))).
+
+    \item Звезда (star\_id(VARCHAR(30)), class(star\_class\_enum), mass(DECIMAL(5, 2)), radius(DECIMAL(10, 4)), temp(INT), dist(DECIMAL(16, 6)), sys\_id(VARCHAR(30))).
+
+    \item Экзопланета (exo\_id(VARCHAR(30)), mass(DECIMAL(10, 4)), radius(DECIMAL(10, 4)), orb\_period(DECIMAL(10, 4)), exo\_type(exo\_type\_enum), dist(DECIMAL(12, 6)), discov\_date(DATE), last\_obs\_date(DATE), sys\_id(VARCHAR(30))).
+
+    \item Телескоп (tele\_id(VARCHAR(47)), tele\_type(tele\_type\_enum), aper(DECIMAL(6, 2)), com\_year(INT), oper(VARCHAR(81)), discov\_plan(INT)).
+
+    \item Наблюдатель (observer\_id(VARCHAR(100)), bday(DATE), country(country\_enum), discovs(INT)).
+
+    \item Наблюдение (observation\_id(VARCHAR(30)), exo\_id(VARCHAR(30)), tele\_id(VARCHAR(47)), observer\_id(VARCHAR(100)), obs\_date(DATE)).
+\end{enumerate}
+
+\subsection{Диаграммы базы данных}
+
+
 	
 \begin{thebibliography}{9}
 		\bibitem{exoplanet} NASA. Exoplanets - NASA Science [Электронный ресурс] / Chelsea Gohd, Diana Logreira --- URL: \url{https://science.nasa.gov/exoplanets/} (дата обращения: 05.02.2026).
