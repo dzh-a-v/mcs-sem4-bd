@@ -392,7 +392,7 @@
 		\centering
 		\caption{Экзопланета}
 		\small
-		\begin{tabular}{|c|p{3.2cm}|p{2.6cm}|p{2.8cm}|c|p{2.5cm}|c|}
+		\begin{tabular}{|c|p{3.2cm}|p{2.6cm}|p{2.8cm}|p{1.5cm}|p{1.5cm}|c|}
 \hline
 № & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка & Прим. \\
 \hline
@@ -429,7 +429,7 @@
 		\centering
 		\caption{Звезда}
 		\small
-		\begin{tabular}{|c|p{3.2cm}|p{2.6cm}|p{2.8cm}|c|p{2.5cm}|c|}
+		\begin{tabular}{|c|p{3.2cm}|p{2.6cm}|p{2.8cm}|p{1.5cm}|p{1.5cm}|c|}
 \hline
 № & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка & Прим. \\
 \hline
@@ -456,7 +456,7 @@
 		\centering
 		\caption{Планетарная система}
 		\small
-\begin{tabular}{|c|p{3.2cm}|p{2.6cm}|p{2.8cm}|c|p{2.5cm}|c|}
+\begin{tabular}{|c|p{3.2cm}|p{2.6cm}|p{2.8cm}|p{1.5cm}|p{1.5cm}|c|}
 \hline
 № & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка & Прим. \\
 \hline
@@ -478,7 +478,7 @@
 		\centering
 		\caption{Звёздная система}
 		\small
-\begin{tabular}{|c|p{3.2cm}|p{2.6cm}|p{2.8cm}|c|p{2.5cm}|c|}
+\begin{tabular}{|c|p{3.2cm}|p{2.6cm}|p{2.8cm}|p{1.5cm}|p{1.5cm}|c|}
 \hline
 № & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка & Прим. \\
 \hline
@@ -500,7 +500,7 @@
 		\centering
 		\caption{Звёздное скопление}
 		\small
-\begin{tabular}{|c|p{3.2cm}|p{2.6cm}|p{2.8cm}|c|p{2.5cm}|c|}
+\begin{tabular}{|c|p{3.2cm}|p{2.6cm}|p{2.8cm}|p{1.5cm}|p{1.5cm}|c|}
 \hline
 № & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка & Прим. \\
 \hline
@@ -521,7 +521,7 @@
 		\centering
 		\caption{Галактика}
 		\small
-\begin{tabular}{|c|p{3.2cm}|p{2.6cm}|p{2.8cm}|c|p{2.5cm}|c|}
+\begin{tabular}{|c|p{3.2cm}|p{2.6cm}|p{2.8cm}|p{1.5cm}|p{1.5cm}|c|}
 \hline
 № & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка & Прим. \\
 \hline
@@ -541,7 +541,7 @@
 		\centering
 		\caption{Телескоп}
 		\small
-\begin{tabular}{|c|p{3.2cm}|p{2.6cm}|p{2.8cm}|c|p{2.5cm}|c|}
+\begin{tabular}{|c|p{3.2cm}|p{2.6cm}|p{2.8cm}|p{1.5cm}|p{1.5cm}|c|}
 \hline
 № & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка & Прим. \\
 \hline
@@ -570,7 +570,7 @@
 		\centering
 		\caption{Наблюдатель}
 		\small
-\begin{tabular}{|c|p{3.2cm}|p{2.6cm}|p{2.8cm}|c|p{2.5cm}|c|}
+\begin{tabular}{|c|p{3.2cm}|p{2.6cm}|p{2.8cm}|c|p{1.5cm}|c|}
 \hline
 № & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка & Прим. \\
 \hline
@@ -592,7 +592,7 @@
 		\centering
 		\caption{Наблюдение}
 		\small
-\begin{tabular}{|c|p{3.2cm}|p{2.6cm}|p{2.8cm}|c|p{2.5cm}|c|}
+\begin{tabular}{|c|p{3.2cm}|p{2.6cm}|p{2.8cm}|p{1.5cm}|p{1.5cm}|c|}
 \hline
 № & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка & Прим. \\
 \hline
@@ -614,29 +614,90 @@
 \subsection{Лингвистическое описание схемы базы данных}
 
 \begin{enumerate}
-    \item Галактика (galaxy\_id(VARCHAR(30)), conf\_plan(INT), hab\_plan(INT), dist(DECIMAL(12, 6))).
+    \item Галактика (галактика\_id(VARCHAR(30)), подтверждённых\_планет(INT), планет\_в\_зоне\_обитаемости(INT), расстояние(DECIMAL(12, 6))).
 
-    \item Звёздное скопление (cluster\_id(VARCHAR(30)), stars\_count(INT), conf\_plan(INT), hab\_plan(INT), dist(DECIMAL(12, 6)), galaxy\_id(VARCHAR(30))).
+    \item Кластер (кластер\_id(VARCHAR(30)), количество\_звёзд(INT), подтверждённых\_планет(INT), планет\_в\_зоне\_обитаемости(INT), расстояние(DECIMAL(12, 6)), галактика\_id(VARCHAR(30))).
 
-    \item Звёздная система (stellar\_id(VARCHAR(30)), stars\_count(INT), conf\_plan(INT), hab\_plan(INT), dist(DECIMAL(12, 6)), cluster\_id(VARCHAR(30))).
+    \item Звёздная система (звёздная\_система\_id(VARCHAR(30)), количество\_звёзд(INT), подтверждённых\_планет(INT), планет\_в\_зоне\_обитаемости(INT), расстояние(DECIMAL(12, 6)), кластер\_id(VARCHAR(30))).
 
-    \item Планетарная система (system\_id(VARCHAR(30)), conf\_plan(INT), hab\_plan(INT), distance(DECIMAL(12, 6)), stell\_sys\_id(VARCHAR(30))).
+    \item Планетарная система (система\_id(VARCHAR(30)), подтверждённых\_планет(INT), планет\_в\_зоне\_обитаемости(INT), расстояние(DECIMAL(12, 6)), звёздная\_система\_id(VARCHAR(30))).
 
-    \item Звезда (star\_id(VARCHAR(30)), class(star\_class\_enum), mass(DECIMAL(5, 2)), radius(DECIMAL(10, 4)), temp(INT), dist(DECIMAL(16, 6)), sys\_id(VARCHAR(30))).
+    \item Класс звезды (класс\_id(SERIAL), класс(VARCHAR(5))).
 
-    \item Экзопланета (exo\_id(VARCHAR(30)), mass(DECIMAL(10, 4)), radius(DECIMAL(10, 4)), orb\_period(DECIMAL(10, 4)), exo\_type(exo\_type\_enum), dist(DECIMAL(12, 6)), discov\_date(DATE), last\_obs\_date(DATE), sys\_id(VARCHAR(30))).
+    \item Звезда (звезда\_id(VARCHAR(30)), класс\_id(INT), масса(DECIMAL(5, 2)), радиус(DECIMAL(10, 4)), температура(INT), расстояние(DECIMAL(16, 6)), система\_id(VARCHAR(30))).
 
-    \item Телескоп (tele\_id(VARCHAR(47)), tele\_type(tele\_type\_enum), aper(DECIMAL(6, 2)), com\_year(INT), oper(VARCHAR(81)), discov\_plan(INT)).
+    \item Тип экзопланеты (тип\_экзопланеты\_id(SERIAL), тип\_экзопланеты(VARCHAR(30))).
 
-    \item Наблюдатель (observer\_id(VARCHAR(100)), bday(DATE), country(country\_enum), discovs(INT)).
+    \item Экзопланета (экзопланета\_id(VARCHAR(30)), масса(DECIMAL(10, 4)), радиус(DECIMAL(10, 4)), орбитальный\_период(DECIMAL(10, 4)), тип\_экзопланеты\_id(INT), расстояние(DECIMAL(12, 6)), дата\_открытия(DATE), дата\_последнего\_наблюдения(DATE), система\_id(VARCHAR(30))).
 
-    \item Наблюдение (observation\_id(VARCHAR(30)), exo\_id(VARCHAR(30)), tele\_id(VARCHAR(47)), observer\_id(VARCHAR(100)), obs\_date(DATE)).
+    \item Тип телескопа (тип\_телескопа\_id(SERIAL), тип\_телескопа(VARCHAR(30))).
+
+    \item Телескоп (телескоп\_id(VARCHAR(47)), тип\_телескопа\_id(INT), апертура(DECIMAL(6, 2)), дата\_создания(INT), оператор(VARCHAR(81)), открыто\_планет(INT)).
+
+    \item Страна (страна\_id(SERIAL), страна(VARCHAR(60))).
+
+    \item Наблюдатель (наблюдатель\_id(VARCHAR(100)), дата\_рождения(DATE), страна\_id(INT), открытий(INT)).
+
+    \item Наблюдение (наблюдение\_id(VARCHAR(30)), экзопланета\_id(VARCHAR(30)), телескоп\_id(VARCHAR(47)), наблюдатель\_id(VARCHAR(100)), дата\_наблюдения(DATE)).
 \end{enumerate}
 
 \subsection{Диаграммы базы данных}
 
-
+\clearpage
+	\newgeometry{paperwidth=420mm,paperheight=297mm,margin=-2mm}
 	
+	\begin{landscape}
+		\thispagestyle{empty}
+		%\captionsetup{font=small,skip=4pt}
+		
+		\begin{figure}[!p]
+			\centering
+			\includegraphics[width=0.9\linewidth,height=\dimexpr\textheight-4\baselineskip\relax,keepaspectratio]{ru.png}
+			\caption{Диаграмма таблиц на русском языке.}
+			\label{ru}
+		\end{figure}
+	\end{landscape}
+	
+	\restoregeometry
+	\clearpage
+
+\clearpage
+	\newgeometry{paperwidth=420mm,paperheight=297mm,margin=-2mm}
+	
+	\begin{landscape}
+		\thispagestyle{empty}
+		%\captionsetup{font=small,skip=4pt}
+		
+		\begin{figure}[!p]
+			\centering
+			\includegraphics[width=0.9\linewidth,height=\dimexpr\textheight-4\baselineskip\relax,keepaspectratio]{en.png}
+			\caption{Диаграмма таблиц на английском языке.}
+			\label{en}
+		\end{figure}
+	\end{landscape}
+	
+	\restoregeometry
+	
+\clearpage
+
+\clearpage
+	\newgeometry{paperwidth=420mm,paperheight=297mm,margin=-2mm}
+	
+	\begin{landscape}
+		\thispagestyle{empty}
+		%\captionsetup{font=small,skip=4pt}
+		
+		\begin{figure}[!p]
+			\centering
+			\includegraphics[width=0.9\linewidth,height=\dimexpr\textheight-4\baselineskip\relax,keepaspectratio]{order.png}
+			\caption{Диаграмма порядка заполнения таблиц.}
+			\label{order}
+		\end{figure}
+	\end{landscape}
+	
+	\restoregeometry
+\clearpage
+
 \begin{thebibliography}{9}
 		\bibitem{exoplanet} NASA. Exoplanets - NASA Science [Электронный ресурс] / Chelsea Gohd, Diana Logreira --- URL: \url{https://science.nasa.gov/exoplanets/} (дата обращения: 05.02.2026).
 		
