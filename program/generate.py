@@ -54,16 +54,16 @@ TARGET_MIN = 200_000
 TARGET_MAX = 300_000
 
 while True:
-    GALAXIES_COUNT = random.randint(3, 10)
-    CLUSTERS_COUNT = random.randint(100, 350)
-    STELLAR_SYSTEMS_COUNT = random.randint(450, 700)
-    PLAN_SYSTEMS_COUNT = random.randint(700, 1400)
-    STARS_COUNT = random.randint(1000, 2000)
-    EXOPLANETS_COUNT = random.randint(6000, 10000)
+    GALAXIES_COUNT = random.randint(30, 70)
+    CLUSTERS_COUNT = random.randint(300, 700)
+    STELLAR_SYSTEMS_COUNT = random.randint(3000, 7000)
+    PLAN_SYSTEMS_COUNT = random.randint(15000, 30000)
+    STARS_COUNT = random.randint(25000, 50000)
+    EXOPLANETS_COUNT = random.randint(30000, 50000)
     TELESCOPES_COUNT = random.randint(200, 500)
-    OBSERVERS_COUNT = random.randint(1000, 5000)
+    OBSERVERS_COUNT = random.randint(7000, 15000)
 
-    estimated_observations = EXOPLANETS_COUNT * 10
+    estimated_observations = EXOPLANETS_COUNT * 4
 
     estimated_total = (
         GALAXIES_COUNT
@@ -79,6 +79,18 @@ while True:
 
     if TARGET_MIN <= estimated_total <= TARGET_MAX:
         break
+
+# Гарантия, что хватит звёзд: минимум 10 звёзд на каждое скопление
+if STARS_COUNT < CLUSTERS_COUNT * 10:
+    STARS_COUNT = CLUSTERS_COUNT * 10
+
+# Гарантия, что хватит планетарных систем: минимум 1 на каждое скопление
+if PLAN_SYSTEMS_COUNT < CLUSTERS_COUNT:
+    PLAN_SYSTEMS_COUNT = CLUSTERS_COUNT
+
+# Гарантия, что хватит звёздных систем: минимум 1 на каждое скопление
+if STELLAR_SYSTEMS_COUNT < CLUSTERS_COUNT:
+    STELLAR_SYSTEMS_COUNT = CLUSTERS_COUNT
 
 print("Случайно выбранное количество записей:")
 print(f"Галактик: {GALAXIES_COUNT}")
@@ -217,9 +229,15 @@ for i in range(1, CLUSTERS_COUNT + 1):
 print("Звёздные системы...")
 
 stellar_ids = []
+stellar_to_cluster = {}
+cluster_stellar_ids = {cluster_id: [] for cluster_id in cluster_ids}
 
-for i in range(1, STELLAR_SYSTEMS_COUNT + 1):
-    stellar_id = make_id("STELLAR", i, 5)
+stellar_counter = 1
+
+# Минимум 1 звёздная система на каждое скопление
+for cluster_id in cluster_ids:
+    stellar_id = make_id("STELLAR", stellar_counter, 5)
+    stellar_counter += 1
 
     conf_plan = random.randint(1, 300)
     hab_plan = random.randint(0, conf_plan)
@@ -234,10 +252,39 @@ for i in range(1, STELLAR_SYSTEMS_COUNT + 1):
         conf_plan,
         hab_plan,
         random_decimal(0, 100000),
-        random.choice(cluster_ids)
+        cluster_id
     ))
 
     stellar_ids.append(stellar_id)
+    stellar_to_cluster[stellar_id] = cluster_id
+    cluster_stellar_ids[cluster_id].append(stellar_id)
+
+# Остальные звёздные системы случайно
+while stellar_counter <= STELLAR_SYSTEMS_COUNT:
+    stellar_id = make_id("STELLAR", stellar_counter, 5)
+    stellar_counter += 1
+
+    cluster_id = random.choice(cluster_ids)
+
+    conf_plan = random.randint(1, 300)
+    hab_plan = random.randint(0, conf_plan)
+
+    cur.execute("""
+        INSERT INTO stellar_system
+        (stellar_id, stars_count, conf_plan, hab_plan, dist, cluster_id)
+        VALUES (%s, %s, %s, %s, %s, %s);
+    """, (
+        stellar_id,
+        random.randint(1, 8),
+        conf_plan,
+        hab_plan,
+        random_decimal(0, 100000),
+        cluster_id
+    ))
+
+    stellar_ids.append(stellar_id)
+    stellar_to_cluster[stellar_id] = cluster_id
+    cluster_stellar_ids[cluster_id].append(stellar_id)
 
 # ===========================
 # 4. Планетные системы
@@ -245,9 +292,17 @@ for i in range(1, STELLAR_SYSTEMS_COUNT + 1):
 print("Планетные системы...")
 
 plan_system_ids = []
+plan_system_to_cluster = {}
+cluster_plan_system_ids = {cluster_id: [] for cluster_id in cluster_ids}
 
-for i in range(1, PLAN_SYSTEMS_COUNT + 1):
-    system_id = make_id("SYS", i, 6)
+system_counter = 1
+
+# Минимум 1 планетарная система на каждое звёздное скопление
+for cluster_id in cluster_ids:
+    system_id = make_id("SYS", system_counter, 6)
+    system_counter += 1
+
+    stellar_id = random.choice(cluster_stellar_ids[cluster_id])
 
     conf_plan = random.randint(1, 20)
     hab_plan = random.randint(0, conf_plan)
@@ -261,20 +316,47 @@ for i in range(1, PLAN_SYSTEMS_COUNT + 1):
         conf_plan,
         hab_plan,
         random_decimal(0, 100000),
-        random.choice(stellar_ids)
+        stellar_id
     ))
 
     plan_system_ids.append(system_id)
+    plan_system_to_cluster[system_id] = cluster_id
+    cluster_plan_system_ids[cluster_id].append(system_id)
+
+# Остальные планетарные системы случайно
+while system_counter <= PLAN_SYSTEMS_COUNT:
+    system_id = make_id("SYS", system_counter, 6)
+    system_counter += 1
+
+    stellar_id = random.choice(stellar_ids)
+    cluster_id = stellar_to_cluster[stellar_id]
+
+    conf_plan = random.randint(1, 20)
+    hab_plan = random.randint(0, conf_plan)
+
+    cur.execute("""
+        INSERT INTO plan_system
+        (system_id, conf_plan, hab_plan, distance, stell_sys_id)
+        VALUES (%s, %s, %s, %s, %s);
+    """, (
+        system_id,
+        conf_plan,
+        hab_plan,
+        random_decimal(0, 100000),
+        stellar_id
+    ))
+
+    plan_system_ids.append(system_id)
+    plan_system_to_cluster[system_id] = cluster_id
+    cluster_plan_system_ids[cluster_id].append(system_id)
 
 # ===========================
 # 5. Звёзды
 # ===========================
 print("Звёзды...")
 
-star_ids = []
 
-for i in range(1, STARS_COUNT + 1):
-    star_id = make_id("STAR", i, 6)
+def generate_star_params():
     star_class = random.choice(star_classes)
 
     if star_class == 'O':
@@ -317,6 +399,12 @@ for i in range(1, STARS_COUNT + 1):
         radius = random_decimal(0.01, 5)
         temp = random.randint(1000, 100000)
 
+    return star_class, mass, radius, temp
+
+
+def insert_star(star_id, system_id):
+    star_class, mass, radius, temp = generate_star_params()
+
     cur.execute("""
         INSERT INTO star
         (star_id, class, mass, radius, temp, dist, sys_id)
@@ -328,9 +416,32 @@ for i in range(1, STARS_COUNT + 1):
         radius,
         temp,
         random_decimal(0, 100000),
-        random.choice(plan_system_ids)
+        system_id
     ))
 
+
+star_ids = []
+star_counter = 1
+
+# Минимум 10 звёзд в каждом звёздном скоплении
+for cluster_id in cluster_ids:
+    for _ in range(10):
+        star_id = make_id("STAR", star_counter, 6)
+        star_counter += 1
+
+        system_id = random.choice(cluster_plan_system_ids[cluster_id])
+
+        insert_star(star_id, system_id)
+        star_ids.append(star_id)
+
+# Остальные звёзды случайно
+while star_counter <= STARS_COUNT:
+    star_id = make_id("STAR", star_counter, 6)
+    star_counter += 1
+
+    system_id = random.choice(plan_system_ids)
+
+    insert_star(star_id, system_id)
     star_ids.append(star_id)
 
 # ===========================
@@ -554,3 +665,35 @@ print(f"Телескопов: {len(tele_ids)}")
 print(f"Наблюдателей: {len(observer_ids)}")
 print(f"Наблюдений: {len(observation_ids)}")
 print(f"Всего записей: {total_records}")
+
+# print()
+# print("Проверочные SQL-запросы:")
+# print("""
+# 1. Проверка, что в каждом скоплении есть минимум 1 планетарная система:
+
+# SELECT 
+#     c.cluster_id,
+#     COUNT(DISTINCT ps.system_id) AS planet_systems_count
+# FROM cluster c
+# LEFT JOIN stellar_system ss 
+#     ON ss.cluster_id = c.cluster_id
+# LEFT JOIN plan_system ps 
+#     ON ps.stell_sys_id = ss.stellar_id
+# GROUP BY c.cluster_id
+# HAVING COUNT(DISTINCT ps.system_id) < 1;
+
+# 2. Проверка, что в каждом скоплении есть минимум 10 звёзд:
+
+# SELECT 
+#     c.cluster_id,
+#     COUNT(s.star_id) AS stars_count
+# FROM cluster c
+# LEFT JOIN stellar_system ss 
+#     ON ss.cluster_id = c.cluster_id
+# LEFT JOIN plan_system ps 
+#     ON ps.stell_sys_id = ss.stellar_id
+# LEFT JOIN star s 
+#     ON s.sys_id = ps.system_id
+# GROUP BY c.cluster_id
+# HAVING COUNT(s.star_id) < 10;
+# """)
