@@ -422,12 +422,12 @@
 1 & экзопланета\_id & exo\_id & VARCHAR(30) & PK & - & NOT NULL \\
 2 & масса & mass & DECIMAL(10,4) & - & - & NOT NULL \\
 3 & радиус & radius & DECIMAL(10,4) & - & - & NOT NULL \\
-4 & орбитальный\_период & orb\_period & DECIMAL(10,4) & - & - & NOT NULL \\
+4 & орбитальный\_ период & orb\_period & DECIMAL(10,4) & - & - & NOT NULL \\
 5 & тип\_экзопланеты & exo\_type & ENUM & - & - & NOT NULL \\
 6 & расстояние & dist & DECIMAL(12,6) & - & - & NOT NULL \\
 7 & дата\_открытия & discov\_date & DATE & - & - & NOT NULL \\
-8 & дата\_последнего\_наблюдения & last\_obs\_date & DATE & - & - & NOT NULL \\
-9 & система\_id & sys\_id & VARCHAR(30) & FK & Планетарная\_система(system\_id) & NOT NULL \\
+8 & дата\_последнего\_ наблюдения & last\_obs\_date & DATE & - & - & NOT NULL \\
+9 & система\_id & sys\_id & VARCHAR(30) & FK & Планета рная\_сис тема (system\_ id) & NOT NULL \\
 \hline
 \end{tabular}
 \end{table}
@@ -461,7 +461,7 @@
 4 & радиус & radius & DECIMAL(10,4) & - & - & NOT NULL \\
 5 & температура & temp & INT & - & - & NOT NULL \\
 6 & расстояние & dist & DECIMAL(16,6) & - & - & NOT NULL \\
-7 & система\_id & sys\_id & VARCHAR(30) & FK & Планетарная\_система(system\_id) & NOT NULL \\
+7 & система\_id & sys\_id & VARCHAR(30) & FK & Планета рная\_ система (system\_ id) & NOT NULL \\
 \hline
 \end{tabular}
 \end{table}
@@ -484,10 +484,10 @@
 № & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка & Прим. \\
 \hline
 1 & система\_id & system\_id & VARCHAR(30) & PK & - & NOT NULL \\
-2 & подтверждённых\_планет & conf\_plan & INT & - & - & NOT NULL \\
-3 & планет\_в\_зоне\_обитаемости & hab\_plan & INT & - & - & NOT NULL \\
+2 & подтверждённых\_ планет & conf\_plan & INT & - & - & NOT NULL \\
+3 & планет\_в\_зоне\_ обитаемости & hab\_plan & INT & - & - & NOT NULL \\
 4 & расстояние & distance & DECIMAL(12,6) & - & - & NOT NULL \\
-5 & звёздная\_система\_id & stell\_sys\_id & VARCHAR(30) & FK & Звёздная\_система(stellar\_id) & NOT NULL \\
+5 & звёздная\_система\_ id & stell\_sys\_id & VARCHAR(30) & FK & Звёздная \_система (stellar\_ id) & NOT NULL \\
 \hline
 \end{tabular}
 \end{table}
@@ -504,12 +504,12 @@
 \hline
 № & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка & Прим. \\
 \hline
-1 & звёздная\_система\_id & stellar\_id & VARCHAR(30) & PK & - & NOT NULL \\
+1 & звёздная\_система\_ id & stellar\_id & VARCHAR(30) & PK & - & NOT NULL \\
 2 & количество\_звёзд & stars\_count & INT & - & - & NOT NULL \\
-3 & подтверждённых\_планет & conf\_plan & INT & - & - & NOT NULL \\
-4 & планет\_в\_зоне\_обитаемости & hab\_plan & INT & - & - & NOT NULL \\
+3 & подтверждённых\_ планет & conf\_plan & INT & - & - & NOT NULL \\
+4 & планет\_в\_зоне\_ обитаемости & hab\_plan & INT & - & - & NOT NULL \\
 5 & расстояние & dist & DECIMAL(12,6) & - & - & NOT NULL \\
-6 & кластер\_id & cluster\_id & VARCHAR(30) & FK & Кластер(cluster\_id) & NOT NULL \\
+6 & кластер\_id & cluster\_id & VARCHAR(30) & FK & Кластер (cluster\_ id) & NOT NULL \\
 \hline
 \end{tabular}
 \end{table}
@@ -528,10 +528,10 @@
 \hline
 1 & кластер\_id & cluster\_id & VARCHAR(30) & PK & - & NOT NULL \\
 2 & количество\_звёзд & stars\_count & INT & - & - & NOT NULL \\
-3 & подтверждённых\_планет & conf\_plan & INT & - & - & NOT NULL \\
-4 & планет\_в\_зоне\_обитаемости & hab\_plan & INT & - & - & NOT NULL \\
+3 & подтверждённых\_ планет & conf\_plan & INT & - & - & NOT NULL \\
+4 & планет\_в\_зоне\_ обитаемости & hab\_plan & INT & - & - & NOT NULL \\
 5 & расстояние & dist & DECIMAL(12,6) & - & - & NOT NULL \\
-6 & галактика\_id & galaxy\_id & VARCHAR(30) & FK & Галактика(galaxy\_id) & NOT NULL \\
+6 & галактика\_id & galaxy\_id & VARCHAR(30) & FK & Галакти ка (galaxy\_ id) & NOT NULL \\
 \hline
 \end{tabular}
 \end{table}
@@ -549,8 +549,8 @@
 № & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка & Прим. \\
 \hline
 1 & галактика\_id & galaxy\_id & VARCHAR(30) & PK & - & NOT NULL \\
-2 & подтверждённых\_планет & conf\_plan & INT & - & - & NOT NULL \\
-3 & планет\_в\_зоне\_обитаемости & hab\_plan & INT & - & - & NOT NULL \\
+2 & подтверждённых\_ планет & conf\_plan & INT & - & - & NOT NULL \\
+3 & планет\_в\_зоне\_ обитаемости & hab\_plan & INT & - & - & NOT NULL \\
 4 & расстояние & dist & DECIMAL(12,6) & - & - & NOT NULL \\
 \hline
 \end{tabular}
@@ -620,9 +620,9 @@
 № & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка & Прим. \\
 \hline
 1 & наблюдение\_id & observation\_id & VARCHAR(30) & PK & - & NOT NULL \\
-2 & экзопланета\_id & exo\_id & VARCHAR(30) & FK & Экзопланета(exo\_id) & NOT NULL \\
-3 & телескоп\_id & tele\_id & VARCHAR(47) & FK & Телескоп(tele\_id) & NOT NULL \\
-4 & наблюдатель\_id & observer\_id & VARCHAR(100) & FK & Наблюдатель(observer\_id) & NOT NULL \\
+2 & экзопланета\_id & exo\_id & VARCHAR(30) & FK & Экзоп- ланета (exo\_id) & NOT NULL \\
+3 & телескоп\_id & tele\_id & VARCHAR(47) & FK & Телескоп (tele\_id) & NOT NULL \\
+4 & наблюдатель\_id & observer\_id & VARCHAR(100) & FK & Наблюда- тель (observer \_id) & NOT NULL \\
 5 & дата\_наблюдения & obs\_date & DATE & - & - & NOT NULL \\
 \hline
 \end{tabular}
@@ -1154,6 +1154,15 @@ for observer_id, count in observer_discovs.items():
 \end{enumerate}
 
 Такой порядок позволяет сначала сформировать все независимые и родительские сущности, затем создать зависимые космические объекты, а в конце заполнить таблицу наблюдений, которая связывает экзопланеты, телескопы и наблюдателей.
+
+Запуск генератора и заполнение таблицы в консоли изображены на рис. \ref{generation}
+
+\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.85\linewidth]{generation}
+		\caption{Заполнение таблицы в консоли.}
+		\label{generation}
+	\end{figure}
 
 \begin{thebibliography}{9}
 		\bibitem{exoplanet} NASA. Exoplanets - NASA Science [Электронный ресурс] / Chelsea Gohd, Diana Logreira --- URL: \url{https://science.nasa.gov/exoplanets/} (дата обращения: 05.02.2026).
