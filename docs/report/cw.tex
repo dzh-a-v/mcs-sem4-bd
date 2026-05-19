@@ -2,7 +2,15 @@
 \usepackage{fontspec}
 \usepackage{polyglossia}
 \setmainlanguage{russian}
-\setmainfont{Times New Roman}
+\setotherlanguage{english}
+
+\setmainfont[Ligatures=TeX]{Times New Roman}
+\setsansfont[Ligatures=TeX]{Arial}
+\setmonofont{Consolas}
+
+\newfontfamily\cyrillicfont[Ligatures=TeX]{Times New Roman}
+\newfontfamily\cyrillicfontsf[Ligatures=TeX]{Arial}
+\newfontfamily\cyrillicfonttt{Consolas}
 \usepackage{setspace}
 \onehalfspacing
 \usepackage{geometry}
@@ -20,10 +28,25 @@
 \definecolor{pastelgreen}{HTML}{B5EAD7}
 \usepackage{booktabs}
 \usepackage{ragged2e} % для justifying
-\usepackage{wasysym} % для космических символов
 \usepackage{graphicx}
 \usepackage{float}
 \usepackage{pdflscape}
+\usepackage{fancyvrb}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{wasysym}
+\usepackage{caption}
+\usepackage{enumitem}
+\usepackage{fvextra}
+
+\DefineVerbatimEnvironment{Code}{Verbatim}{
+    fontsize=\small,
+    breaklines=true,
+    breakanywhere=true,
+    frame=single,
+    numbers=left,
+    numbersep=6pt
+}
 
 \begin{document}
 	
@@ -389,26 +412,25 @@
 	В следующих таблицах указаны метаданные полученной базы данных и обоснования доменов аттрибутов.
 
 	\begin{table}[H]
-		\centering
-		\caption{Экзопланета}
-		\small
-		\begin{tabular}{|c|p{3.2cm}|p{2.6cm}|p{2.8cm}|p{1.5cm}|p{1.5cm}|c|}
+    \centering
+    \caption{Экзопланета}
+    \small
+    \begin{tabular}{|c|p{3.2cm}|p{2.6cm}|p{2.8cm}|p{1.5cm}|p{1.5cm}|c|}
 \hline
 № & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка & Прим. \\
 \hline
-1 & Идентификатор & id & VARCHAR(30) & PK & - & NOT NULL \\
-2 & Масса & mass & DECIMAL(10,4) & - & - & NOT NULL \\
-3 & Радиус & radius & DECIMAL(10,4) & - & - & NOT NULL \\
-4 & Орбитальный период & orbital\_period & DECIMAL(10,4) & - & - & NOT NULL \\
-5 & Тип планеты & planet\_type & ENUM & - & - & NOT NULL \\
-6 & Расстояние & distance & DECIMAL(12,6) & - & - & NOT NULL \\
-7 & Дата открытия & discovery\_date & DATE & - & - & NOT NULL \\
-8 & Дата последнего наблюдения & last\_obs\_date & DATE & - & - & NOT NULL \\
-9 & Идентификатор системы & system\_id & VARCHAR(30) & FK & Планетарная\_система(id) & NOT NULL \\
+1 & экзопланета\_id & exo\_id & VARCHAR(30) & PK & - & NOT NULL \\
+2 & масса & mass & DECIMAL(10,4) & - & - & NOT NULL \\
+3 & радиус & radius & DECIMAL(10,4) & - & - & NOT NULL \\
+4 & орбитальный\_период & orb\_period & DECIMAL(10,4) & - & - & NOT NULL \\
+5 & тип\_экзопланеты & exo\_type & ENUM & - & - & NOT NULL \\
+6 & расстояние & dist & DECIMAL(12,6) & - & - & NOT NULL \\
+7 & дата\_открытия & discov\_date & DATE & - & - & NOT NULL \\
+8 & дата\_последнего\_наблюдения & last\_obs\_date & DATE & - & - & NOT NULL \\
+9 & система\_id & sys\_id & VARCHAR(30) & FK & Планетарная\_система(system\_id) & NOT NULL \\
 \hline
 \end{tabular}
-	\end{table}
-
+\end{table}
 	\begin{itemize}
 		\item Идентификатор экзопланеты, звезды, планетарной системы, звёздной системы, звёздного
 	скопления и галактики ограничен 30 символами, а названия космических объектов
@@ -426,22 +448,23 @@
 	\end{itemize}
 
 	\begin{table}[H]
-		\centering
-		\caption{Звезда}
-		\small
-		\begin{tabular}{|c|p{3.2cm}|p{2.6cm}|p{2.8cm}|p{1.5cm}|p{1.5cm}|c|}
+    \centering
+    \caption{Звезда}
+    \small
+    \begin{tabular}{|c|p{3.2cm}|p{2.6cm}|p{2.8cm}|p{1.5cm}|p{1.5cm}|c|}
 \hline
 № & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка & Прим. \\
 \hline
-1 & Идентификатор & id & VARCHAR(30) & PK & - & NOT NULL \\
-2 & Спектральный класс & spectral\_class & VARCHAR(5) & - & - & NOT NULL \\
-3 & Масса & mass & DECIMAL(5,2) & - & - & NOT NULL \\
-4 & Радиус & radius & DECIMAL(10,4) & - & - & NOT NULL \\
-5 & Температура поверхности & temperature & INT & - & - & NOT NULL \\
-6 & Расстояние & distance & DECIMAL(16,6) & - & - & NOT NULL \\
+1 & звезда\_id & star\_id & VARCHAR(30) & PK & - & NOT NULL \\
+2 & класс & class & ENUM & - & - & NOT NULL \\
+3 & масса & mass & DECIMAL(5,2) & - & - & NOT NULL \\
+4 & радиус & radius & DECIMAL(10,4) & - & - & NOT NULL \\
+5 & температура & temp & INT & - & - & NOT NULL \\
+6 & расстояние & dist & DECIMAL(16,6) & - & - & NOT NULL \\
+7 & система\_id & sys\_id & VARCHAR(30) & FK & Планетарная\_система(system\_id) & NOT NULL \\
 \hline
 \end{tabular}
-	\end{table}
+\end{table}
 
 	\begin{itemize}
 		\item Масса звезды хранится как \textit{DECIMAL(5,2)}, т.к. самая массивная звезда \textit{R136a1} имеет массу 150--200 масс Солнца (т.е. 3 целых числа), а двух знаков после запятой достаточно для точности размеров ближайших звезд.
@@ -453,107 +476,107 @@
 	\end{itemize}
 
 	\begin{table}[H]
-		\centering
-		\caption{Планетарная система}
-		\small
+    \centering
+    \caption{Планетарная система}
+    \small
 \begin{tabular}{|c|p{3.2cm}|p{2.6cm}|p{2.8cm}|p{1.5cm}|p{1.5cm}|c|}
 \hline
 № & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка & Прим. \\
 \hline
-1 & Идентификатор & id & VARCHAR(30) & PK & - & NOT NULL \\
-2 & Кол-во подтверждённых планет & confirmed\_planets & INT & - & - & NOT NULL \\
-3 & Планеты в зоне обитаемости & habitable\_planets & INT & - & - & NOT NULL \\
-4 & Расстояние & distance & DECIMAL(12,6) & - & - & NOT NULL \\
-5 & Идентификатор звезды & star\_id & VARCHAR(30) & FK & Звезда(id) & NOT NULL \\
-6 & Идентификатор звёздной системы & stellar\_sys\_id & VARCHAR(30) & FK & Звёздная\_система(id) & NOT NULL \\
+1 & система\_id & system\_id & VARCHAR(30) & PK & - & NOT NULL \\
+2 & подтверждённых\_планет & conf\_plan & INT & - & - & NOT NULL \\
+3 & планет\_в\_зоне\_обитаемости & hab\_plan & INT & - & - & NOT NULL \\
+4 & расстояние & distance & DECIMAL(12,6) & - & - & NOT NULL \\
+5 & звёздная\_система\_id & stell\_sys\_id & VARCHAR(30) & FK & Звёздная\_система(stellar\_id) & NOT NULL \\
 \hline
 \end{tabular}
-	\end{table}
+\end{table}
 
 	\begin{itemize}
 		\item Количество подтверждённых планет, планет в зоне обитаемости хранится как целое число (\textit{INT}) и имеют минимальные значения, соответствюущие данным астрономическим объектам.
 	\end{itemize}
 
 	\begin{table}[H]
-		\centering
-		\caption{Звёздная система}
-		\small
+    \centering
+    \caption{Звёздная система}
+    \small
 \begin{tabular}{|c|p{3.2cm}|p{2.6cm}|p{2.8cm}|p{1.5cm}|p{1.5cm}|c|}
 \hline
 № & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка & Прим. \\
 \hline
-1 & Идентификатор & id & VARCHAR(30) & PK & - & NOT NULL \\
-2 & Количество звёзд & stars\_count & INT & - & - & NOT NULL \\
-3 & Подтв. планеты & confirmed\_planets & INT & - & - & NOT NULL \\
-4 & Планеты в зоне обитаемости & habitable\_planets & INT & - & - & NOT NULL \\
-5 & Расстояние & distance & DECIMAL(12,6) & - & - & NOT NULL \\
-6 & Идентификатор скопления & cluster\_id & VARCHAR(30) & FK & Звёздное\_скопление(id) & NOT NULL \\
+1 & звёздная\_система\_id & stellar\_id & VARCHAR(30) & PK & - & NOT NULL \\
+2 & количество\_звёзд & stars\_count & INT & - & - & NOT NULL \\
+3 & подтверждённых\_планет & conf\_plan & INT & - & - & NOT NULL \\
+4 & планет\_в\_зоне\_обитаемости & hab\_plan & INT & - & - & NOT NULL \\
+5 & расстояние & dist & DECIMAL(12,6) & - & - & NOT NULL \\
+6 & кластер\_id & cluster\_id & VARCHAR(30) & FK & Кластер(cluster\_id) & NOT NULL \\
 \hline
 \end{tabular}
-	\end{table}
+\end{table}
 
 	\begin{itemize}
 		\item Количество подтверждённых планет, планет в зоне обитаемости, звёзд хранится как целое число (\textit{INT}) и имеют минимальные значения, соответствюущие данным астрономическим объектам.
 	\end{itemize}
 
 	\begin{table}[H]
-		\centering
-		\caption{Звёздное скопление}
-		\small
+    \centering
+    \caption{Кластер}
+    \small
 \begin{tabular}{|c|p{3.2cm}|p{2.6cm}|p{2.8cm}|p{1.5cm}|p{1.5cm}|c|}
 \hline
 № & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка & Прим. \\
 \hline
-1 & Идентификатор & id & VARCHAR(30) & PK & - & NOT NULL \\
-2 & Количество звёзд & stars\_count & INT & - & - & NOT NULL \\
-3 & Подтв. планеты & confirmed\_planets & INT & - & - & NOT NULL \\
-4 & Расстояние & distance & DECIMAL(12,6) & - & - & NOT NULL \\
-5 & Идентификатор галактики & galaxy\_id & VARCHAR(30) & FK & Галактика(id) & NOT NULL \\
+1 & кластер\_id & cluster\_id & VARCHAR(30) & PK & - & NOT NULL \\
+2 & количество\_звёзд & stars\_count & INT & - & - & NOT NULL \\
+3 & подтверждённых\_планет & conf\_plan & INT & - & - & NOT NULL \\
+4 & планет\_в\_зоне\_обитаемости & hab\_plan & INT & - & - & NOT NULL \\
+5 & расстояние & dist & DECIMAL(12,6) & - & - & NOT NULL \\
+6 & галактика\_id & galaxy\_id & VARCHAR(30) & FK & Галактика(galaxy\_id) & NOT NULL \\
 \hline
 \end{tabular}
-	\end{table}
+\end{table}
 
 	\begin{itemize}
 		\item Количество подтверждённых планет, звёзд хранится как целое число (\textit{INT}) и имеют минимальные значения, соответствюущие данным астрономическим объектам (например, звёздное скопление содержит как минимум 10 звёзд по определению, поэтому это число является минимальным значением данного поля для звёздных скоплений).
 	\end{itemize}
 
 	\begin{table}[H]
-		\centering
-		\caption{Галактика}
-		\small
+    \centering
+    \caption{Галактика}
+    \small
 \begin{tabular}{|c|p{3.2cm}|p{2.6cm}|p{2.8cm}|p{1.5cm}|p{1.5cm}|c|}
 \hline
 № & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка & Прим. \\
 \hline
-1 & Идентификатор & id & VARCHAR(30) & PK & - & NOT NULL \\
-2 & Подтв. планеты & confirmed\_planets & INT & - & - & NOT NULL \\
-3 & Планеты в зоне обитаемости & habitable\_planets & INT & - & - & NOT NULL \\
-4 & Расстояние & distance & DECIMAL(12,6) & - & - & NOT NULL \\
+1 & галактика\_id & galaxy\_id & VARCHAR(30) & PK & - & NOT NULL \\
+2 & подтверждённых\_планет & conf\_plan & INT & - & - & NOT NULL \\
+3 & планет\_в\_зоне\_обитаемости & hab\_plan & INT & - & - & NOT NULL \\
+4 & расстояние & dist & DECIMAL(12,6) & - & - & NOT NULL \\
 \hline
 \end{tabular}
-	\end{table}
+\end{table}
 
 	\begin{itemize}
 		\item Количество подтверждённых планет и планет в зоне обитаемости хранится как целое число (\textit{INT}) и имеют минимальные значения, соответствюущие данным астрономическим объектам.
 	\end{itemize}
 
 	\begin{table}[H]
-		\centering
-		\caption{Телескоп}
-		\small
+    \centering
+    \caption{Телескоп}
+    \small
 \begin{tabular}{|c|p{3.2cm}|p{2.6cm}|p{2.8cm}|p{1.5cm}|p{1.5cm}|c|}
 \hline
 № & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка & Прим. \\
 \hline
-1 & Название телескопа & name & VARCHAR(47) & PK & - & NOT NULL \\
-2 & Тип & type & ENUM & - & - & NOT NULL \\
-3 & Диаметр апертуры & aperture & DECIMAL(6,2) & - & - & NOT NULL \\
-4 & Год ввода & comm\_year & INT & - & - & NOT NULL \\
-5 & Организация & operator & VARCHAR(81) & - & - & NOT NULL \\
-6 & Открытые планеты & discovered\_planets & INT & - & - & NOT NULL \\
+1 & телескоп\_id & tele\_id & VARCHAR(47) & PK & - & NOT NULL \\
+2 & тип\_телескопа & tele\_type & ENUM & - & - & NOT NULL \\
+3 & апертура & aper & DECIMAL(6,2) & - & - & NOT NULL \\
+4 & дата\_создания & com\_year & INT & - & - & NOT NULL \\
+5 & оператор & oper & VARCHAR(81) & - & - & NOT NULL \\
+6 & открыто\_планет & discov\_plan & INT & - & - & NOT NULL \\
 \hline
 \end{tabular}
-	\end{table}
+\end{table}
 
 	\begin{itemize}
 		\item Название телескопа ограничено 47 символами. Самое длинное название телескопа: \textit{Atacama Large Millimeter/submillimeter Array}.
@@ -567,20 +590,20 @@
 	\end{itemize}
 
 	\begin{table}[H]
-		\centering
-		\caption{Наблюдатель}
-		\small
+    \centering
+    \caption{Наблюдатель}
+    \small
 \begin{tabular}{|c|p{3.2cm}|p{2.6cm}|p{2.8cm}|c|p{1.5cm}|c|}
 \hline
 № & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка & Прим. \\
 \hline
-1 & Идентификатор & id & VARCHAR(100) & PK & - & NOT NULL \\
-2 & Дата рождения & birth\_date & DATE & - & - & NOT NULL \\
-3 & Страна & country & VARCHAR(56) & - & - & NOT NULL \\
-4 & Количество открытий & discoveries & INT & - & - & NOT NULL \\
+1 & наблюдатель\_id & observer\_id & VARCHAR(100) & PK & - & NOT NULL \\
+2 & дата\_рождения & bday & DATE & - & - & NOT NULL \\
+3 & страна & country & ENUM & - & - & NOT NULL \\
+4 & открытий & discovs & INT & - & - & NOT NULL \\
 \hline
 \end{tabular}
-	\end{table}
+\end{table}
 
 	\begin{itemize}
 		\item Название наблюдателя (ФИО или организация) ограничено 100 символами.
@@ -589,21 +612,21 @@
 	\end{itemize}
 
 	\begin{table}[H]
-		\centering
-		\caption{Наблюдение}
-		\small
+    \centering
+    \caption{Наблюдение}
+    \small
 \begin{tabular}{|c|p{3.2cm}|p{2.6cm}|p{2.8cm}|p{1.5cm}|p{1.5cm}|c|}
 \hline
 № & Название RU & Название EN & Тип атрибута & Тип ключа & Ссылка & Прим. \\
 \hline
-1 & Идентификатор & id & VARCHAR(30) & PK & - & NOT NULL \\
-2 & Экзопланета & exoplanet\_id & VARCHAR(30) & FK & Экзопланета(id) & NOT NULL \\
-3 & Телескоп & telescope\_name & VARCHAR(47) & FK & Телескоп(name) & NOT NULL \\
-4 & Наблюдатель & observer\_id & VARCHAR(100) & FK & Наблюдатель(id) & NOT NULL \\
-5 & Дата наблюдения & observation\_date & DATE & - & - & NOT NULL \\
+1 & наблюдение\_id & observation\_id & VARCHAR(30) & PK & - & NOT NULL \\
+2 & экзопланета\_id & exo\_id & VARCHAR(30) & FK & Экзопланета(exo\_id) & NOT NULL \\
+3 & телескоп\_id & tele\_id & VARCHAR(47) & FK & Телескоп(tele\_id) & NOT NULL \\
+4 & наблюдатель\_id & observer\_id & VARCHAR(100) & FK & Наблюдатель(observer\_id) & NOT NULL \\
+5 & дата\_наблюдения & obs\_date & DATE & - & - & NOT NULL \\
 \hline
 \end{tabular}
-	\end{table}
+\end{table}
 
 	\begin{itemize}
 		\item Идентификатор наблюдения хранится как \textit{VARCHAR(30)} и представляет собой искусственный ключ. В отличие от других сущностей, наблюдение является событием, которое не имеет устойчивого естественного идентификатора, поэтому использование составного ключа (экзопланета, телескоп, наблюдатель, дата) является избыточным и усложняет структуру базы данных. Ограничение в 30 символов выбрано для унификации с другими идентификаторами.
@@ -643,7 +666,14 @@
 
 \subsection{Диаграммы базы данных}
 
+	На рис. \ref{ru} изображена схема базы данных на русском языке.
+
+	На рис. \ref{en} изображена схема базы данных на русском языке.
+
+	На рис. \ref{order} изображён порядок заполнения таблиц базы данных.
+
 \clearpage
+
 	\newgeometry{paperwidth=420mm,paperheight=297mm,margin=-2mm}
 	
 	\begin{landscape}
@@ -662,6 +692,7 @@
 	\clearpage
 
 \clearpage
+
 	\newgeometry{paperwidth=420mm,paperheight=297mm,margin=-2mm}
 	
 	\begin{landscape}
@@ -741,4 +772,186 @@
 		
 		\bibitem{names-standards} \url{https://www.scientificamerican.com/article/how-do-we-name-the-stars/#:~:text=These%20more%20modern%20datasets%20(and,Betelgeuse.}
 	\end{thebibliography}
+
+\newpage
+
+\section*{Приложение А. Исходный тест программы генерации базы данных}
+\addcontentsline{toc}{section}{Приложение А. Исходный тест программы генерации базы данных}
+
+\begin{Code}
+-- schema.sql
+
+-- ========================
+-- ENUM TYPES
+-- ========================
+
+CREATE TYPE tele_type_enum AS ENUM ('space', 'ground');
+
+CREATE TYPE exo_type_enum AS ENUM (
+    'gas_giant',
+    'neptunian',
+    'superearth',
+    'terrestrial'
+);
+
+CREATE TYPE star_class_enum AS ENUM (
+    'O','B','A','F','G','K','M','W','L','D'
+);
+
+CREATE TYPE country_enum AS ENUM (
+'Afghanistan','Albania','Algeria','Andorra','Angola','Antigua and Barbuda',
+'Argentina','Armenia','Australia','Austria','Azerbaijan',
+'Bahamas','Bahrain','Bangladesh','Barbados','Belarus','Belgium','Belize',
+'Benin','Bhutan','Bolivia','Bosnia and Herzegovina','Botswana','Brazil',
+'Brunei','Bulgaria','Burkina Faso','Burundi',
+'Cabo Verde','Cambodia','Cameroon','Canada','Central African Republic',
+'Chad','Chile','China','Colombia','Comoros','Congo (Congo-Brazzaville)',
+'Costa Rica','Croatia','Cuba','Cyprus','Czechia',
+'Democratic Republic of the Congo','Denmark','Djibouti','Dominica',
+'Dominican Republic',
+'Ecuador','Egypt','El Salvador','Equatorial Guinea','Eritrea','Estonia',
+'Eswatini','Ethiopia',
+'Fiji','Finland','France',
+'Gabon','Gambia','Georgia','Germany','Ghana','Greece','Grenada',
+'Guatemala','Guinea','Guinea-Bissau','Guyana',
+'Haiti','Honduras','Hungary',
+'Iceland','India','Indonesia','Iran','Iraq','Ireland','Israel','Italy',
+'Jamaica','Japan','Jordan',
+'Kazakhstan','Kenya','Kiribati','Kuwait','Kyrgyzstan',
+'Laos','Latvia','Lebanon','Lesotho','Liberia','Libya','Liechtenstein',
+'Lithuania','Luxembourg',
+'Madagascar','Malawi','Malaysia','Maldives','Mali','Malta',
+'Marshall Islands','Mauritania','Mauritius','Mexico','Micronesia',
+'Moldova','Monaco','Mongolia','Montenegro','Morocco','Mozambique',
+'Myanmar',
+'Namibia','Nauru','Nepal','Netherlands','New Zealand','Nicaragua','Niger',
+'Nigeria','North Korea','North Macedonia','Norway',
+'Oman',
+'Pakistan','Palau','Panama','Papua New Guinea','Paraguay','Peru',
+'Philippines','Poland','Portugal',
+'Qatar',
+'Romania','Russia','Rwanda',
+'Saint Kitts and Nevis','Saint Lucia',
+'Saint Vincent and the Grenadines','Samoa','San Marino',
+'Sao Tome and Principe','Saudi Arabia','Senegal','Serbia','Seychelles',
+'Sierra Leone','Singapore','Slovakia','Slovenia','Solomon Islands',
+'Somalia','South Africa','South Korea','South Sudan','Spain','Sri Lanka',
+'Sudan','Suriname','Sweden','Switzerland','Syria',
+'Taiwan','Tajikistan','Tanzania','Thailand','Timor-Leste','Togo','Tonga',
+'Trinidad and Tobago','Tunisia','Turkey','Turkmenistan','Tuvalu',
+'Uganda','Ukraine','United Arab Emirates','United Kingdom',
+'United States','Uruguay','Uzbekistan',
+'Vanuatu','Vatican City','Venezuela','Vietnam',
+'Yemen',
+'Zambia','Zimbabwe'
+);
+
+-- ========================
+-- CORE TABLES
+-- ========================
+
+CREATE TABLE galaxy (
+    galaxy_id VARCHAR(30) PRIMARY KEY,
+    conf_plan INT NOT NULL CHECK (conf_plan >= 0),
+    hab_plan  INT NOT NULL CHECK (hab_plan >= 0 AND hab_plan <= conf_plan),
+    dist      DECIMAL(12, 6) NOT NULL CHECK (dist >= 0)
+);
+
+CREATE TABLE cluster (
+    cluster_id  VARCHAR(30) PRIMARY KEY,
+    stars_count INT NOT NULL CHECK (stars_count >= 10),
+    conf_plan   INT NOT NULL CHECK (conf_plan >= 0),
+    hab_plan    INT NOT NULL CHECK (hab_plan >= 0 AND hab_plan <= conf_plan),
+    dist        DECIMAL(12, 6) NOT NULL CHECK (dist >= 0),
+    galaxy_id   VARCHAR(30) NOT NULL
+        REFERENCES galaxy(galaxy_id) ON DELETE CASCADE
+);
+
+CREATE TABLE stellar_system (
+    stellar_id  VARCHAR(30) PRIMARY KEY,
+    stars_count INT NOT NULL CHECK (stars_count >= 1),
+    conf_plan   INT NOT NULL CHECK (conf_plan >= 0),
+    hab_plan    INT NOT NULL CHECK (hab_plan >= 0 AND hab_plan <= conf_plan),
+    dist        DECIMAL(12, 6) NOT NULL CHECK (dist >= 0),
+    cluster_id  VARCHAR(30) NOT NULL
+        REFERENCES cluster(cluster_id) ON DELETE CASCADE
+);
+
+CREATE TABLE plan_system (
+    system_id    VARCHAR(30) PRIMARY KEY,
+    conf_plan    INT NOT NULL CHECK (conf_plan >= 1),
+    hab_plan     INT NOT NULL CHECK (hab_plan >= 0 AND hab_plan <= conf_plan),
+    distance     DECIMAL(12, 6) NOT NULL CHECK (distance >= 0),
+    stell_sys_id VARCHAR(30) NOT NULL
+        REFERENCES stellar_system(stellar_id) ON DELETE CASCADE
+);
+
+-- ========================
+-- OBJECTS
+-- ========================
+
+CREATE TABLE star (
+    star_id  VARCHAR(30) PRIMARY KEY,
+    class    star_class_enum NOT NULL,
+    mass     DECIMAL(5, 2) NOT NULL CHECK (mass > 0),
+    radius   DECIMAL(10, 4) NOT NULL CHECK (radius > 0),
+    temp     INT NOT NULL CHECK (temp > 0),
+    dist     DECIMAL(16, 6) NOT NULL CHECK (dist >= 0),
+    sys_id   VARCHAR(30) NOT NULL
+        REFERENCES plan_system(system_id) ON DELETE CASCADE
+);
+
+CREATE TABLE exoplanet (
+    exo_id        VARCHAR(30) PRIMARY KEY,
+    mass          DECIMAL(10, 4) NOT NULL CHECK (mass > 0),
+    radius        DECIMAL(10, 4) NOT NULL CHECK (radius > 0),
+    orb_period    DECIMAL(10, 4) NOT NULL CHECK (orb_period > 0),
+    exo_type      exo_type_enum NOT NULL,
+    dist          DECIMAL(12, 6) NOT NULL CHECK (dist >= 0),
+    discov_date   DATE NOT NULL CHECK (
+        discov_date BETWEEN DATE '1992-01-01' AND CURRENT_DATE
+    ),
+    last_obs_date DATE NOT NULL CHECK (
+        last_obs_date BETWEEN discov_date AND CURRENT_DATE
+    ),
+    sys_id        VARCHAR(30) NOT NULL
+        REFERENCES plan_system(system_id) ON DELETE CASCADE
+);
+
+CREATE TABLE telescope (
+    tele_id VARCHAR(47) PRIMARY KEY,
+    tele_type tele_type_enum NOT NULL,
+    aper DECIMAL(6,2) NOT NULL CHECK (aper > 0),
+    com_year INT NOT NULL CHECK (
+        com_year BETWEEN 1609 AND EXTRACT(YEAR FROM CURRENT_DATE)::INT
+    ),
+    oper VARCHAR(81) NOT NULL,
+    discov_plan INT NOT NULL CHECK (discov_plan >= 0)
+);
+
+CREATE TABLE observer (
+    observer_id VARCHAR(100) PRIMARY KEY,
+    bday        DATE NOT NULL CHECK (
+        bday BETWEEN DATE '1609-01-01' AND CURRENT_DATE
+    ),
+    country     country_enum NOT NULL,
+    discovs     INT NOT NULL CHECK (discovs >= 0)
+);
+
+CREATE TABLE observation (
+    observation_id VARCHAR(30) PRIMARY KEY,
+    exo_id         VARCHAR(30) NOT NULL
+        REFERENCES exoplanet(exo_id) ON DELETE CASCADE,
+    tele_id        VARCHAR(47) NOT NULL
+        REFERENCES telescope(tele_id) ON DELETE CASCADE,
+    observer_id    VARCHAR(100) NOT NULL
+        REFERENCES observer(observer_id) ON DELETE CASCADE,
+    obs_date       DATE NOT NULL CHECK (
+        obs_date BETWEEN DATE '1992-01-01' AND CURRENT_DATE
+    ),
+    CONSTRAINT observation_unique_event
+        UNIQUE (exo_id, tele_id, observer_id, obs_date)
+);
+\end{Code}
+
 \end{document}
