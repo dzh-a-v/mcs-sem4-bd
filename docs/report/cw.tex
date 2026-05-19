@@ -748,7 +748,7 @@ cur = conn.cursor()
 Листинг 1 --- Подключение к базе данных
 \end{center}
 
-Перед генерацией новых данных выполняется очистка таблиц с помощью оператора \textit{TRUNCATE}. Таблицы перечислены в порядке от наиболее зависимых к родительским, а параметр \textit{CASCADE} позволяет удалить связанные записи, не нарушая ограничения внешних ключей.
+Перед генерацией новых данных выполняется очистка таблиц с помощью оператора \textit{TRUNCATE}. Таблицы перечислены в порядке от наиболее зависимых к родительским, а параметр \textit{CASCADE} позволяет завершать \textit{TRUNCATE} без ошибок, убирая связи между таблицами, чтобы не возникали ошибки.
 
 \begin{Code}
 cur.execute("""
@@ -790,7 +790,7 @@ def make_id(prefix, number, width=5):
 Листинг 3 --- Вспомогательные функции генерации
 \end{center}
 
-Количество записей в основных таблицах выбирается случайно. При этом программа контролирует итоговый объём данных: сумма записей должна находиться в диапазоне от 200~000 до 300~000. Количество наблюдений оценивается приблизительно как произведение количества экзопланет на среднее число наблюдений для одной экзопланеты.
+Количество записей в основных таблицах выбирается случайно. При этом программа контролирует итоговый объём данных: сумма записей должна находиться в диапазоне от 200~000 до 300~000 (задано константами). Количество наблюдений оценивается приблизительно как произведение количества экзопланет на среднее число наблюдений для одной экзопланеты.
 
 \begin{Code}
 TARGET_MIN = 200_000
@@ -880,7 +880,7 @@ for i in range(1, GALAXIES_COUNT + 1):
     cur.execute("""
         INSERT INTO galaxy
         (galaxy_id, conf_plan, hab_plan, dist)
-        VALUES (%s, %s, %s, %s);
+        VALUES (\%s, \%s, \%s, \%s);
     """, (
         galaxy_id,
         conf_plan,
@@ -901,7 +901,7 @@ for i in range(1, GALAXIES_COUNT + 1):
 cur.execute("""
     INSERT INTO telescope
     (tele_id, tele_type, aper, com_year, oper, discov_plan)
-    VALUES (%s, %s, %s, %s, %s, %s);
+    VALUES (\%s, \%s, \%s, \%s, \%s, \%s);
 """, (
     tele_id,
     tele_type,
@@ -922,7 +922,7 @@ cur.execute("""
 cur.execute("""
     INSERT INTO observer
     (observer_id, bday, country, discovs)
-    VALUES (%s, %s, %s, %s);
+    VALUES (\%s, \%s, \%s, \%s);
 """, (
     observer_id,
     random_date(date(1930, 1, 1), date(2005, 12, 31)),
@@ -935,13 +935,13 @@ cur.execute("""
 Листинг 9 --- Вставка наблюдателя
 \end{center}
 
-При создании звёздных скоплений используется внешний ключ \textit{galaxy\_id}. Для этого идентификаторы ранее созданных галактик сохраняются в списке \textit{galaxy\_ids}, после чего случайный идентификатор выбирается из этого списка.
+При создании звёздных скоплений используется внешний ключ \textit{galaxy\_id}. Для этого идентификаторы ранее созданных галактик сохраняются в списке \textit{galaxy\_ids}, после чего выбираются идентификаторы оттуда.
 
 \begin{Code}
 cur.execute("""
     INSERT INTO cluster
     (cluster_id, stars_count, conf_plan, hab_plan, dist, galaxy_id)
-    VALUES (%s, %s, %s, %s, %s, %s);
+    VALUES (\%s, \%s, \%s, \%s, \%s, \%s);
 """, (
     cluster_id,
     random.randint(10, 100000),
@@ -972,7 +972,7 @@ for cluster_id in cluster_ids:
     cur.execute("""
         INSERT INTO stellar_system
         (stellar_id, stars_count, conf_plan, hab_plan, dist, cluster_id)
-        VALUES (%s, %s, %s, %s, %s, %s);
+        VALUES (\%s, \%s, \%s, \%s, \%s, \%s);
     """, (
         stellar_id,
         random.randint(1, 8),
@@ -991,7 +991,7 @@ for cluster_id in cluster_ids:
 Листинг 11 --- Вставка звёздных систем
 \end{center}
 
-На четвёртом уровне создаются планетарные системы. Сначала для каждого звёздного скопления создаётся минимум одна планетарная система, связанная с одной из звёздных систем этого скопления. Затем оставшиеся планетарные системы распределяются случайно между уже существующими звёздными системами.
+На четвёртом уровне создаются планетарные системы. Для каждого звёздного скопления создаётся минимум одна планетарная система, связанная с одной из звёздных систем этого скопления. Это гарантирует логичность и корректность распределения данных. %Затем оставшиеся планетарные системы распределяются случайно между уже существующими звёздными системами.
 
 \begin{Code}
 plan_system_ids = []
@@ -1009,7 +1009,7 @@ for cluster_id in cluster_ids:
     cur.execute("""
         INSERT INTO plan_system
         (system_id, conf_plan, hab_plan, distance, stell_sys_id)
-        VALUES (%s, %s, %s, %s, %s);
+        VALUES (\%s, \%s, \%s, \%s, \%s);
     """, (
         system_id,
         conf_plan,
@@ -1045,7 +1045,7 @@ for cluster_id in cluster_ids:
 Листинг 13 --- Создание минимум десяти звёзд на скопление
 \end{center}
 
-Параметры звезды зависят от её спектрального класса. Для каждого класса задаются собственные диапазоны массы, радиуса и температуры. Это позволяет получать более правдоподобные данные, чем при полностью равномерной генерации всех физических характеристик.
+Параметры звезды зависят от её спектрального класса. Для каждого класса задаются собственные диапазоны массы, радиуса и температуры. %Это позволяет получать более правдоподобные данные, чем при полностью равномерной генерации всех физических характеристик.
 
 \begin{Code}
 def generate_star_params():
@@ -1059,12 +1059,12 @@ def generate_star_params():
         mass = random_decimal(2.1, 16)
         radius = random_decimal(1.8, 6)
         temp = random.randint(10000, 30000)
-
+...
     return star_class, mass, radius, temp
 \end{Code}
 
 \begin{center}
-Листинг 14 --- Генерация параметров звезды
+Листинг 14 --- Генерация параметров звезды (полный код см. в разделе \hyperref[b][Приложение Б]).
 \end{center}
 
 Экзопланеты также генерируются с учётом типа. Для газовых гигантов, нептуновых планет, суперземель и планет земного типа используются разные диапазоны массы и радиуса. Дата последнего наблюдения генерируется так, чтобы она была не раньше даты открытия.
@@ -1120,8 +1120,8 @@ while unique_key in used_observations and attempts < 20:
 for tele_id, count in telescope_discovs.items():
     cur.execute("""
         UPDATE telescope
-        SET discov_plan = %s
-        WHERE tele_id = %s;
+        SET discov_plan = \%s
+        WHERE tele_id = \%s;
     """, (
         count,
         tele_id
@@ -1130,8 +1130,8 @@ for tele_id, count in telescope_discovs.items():
 for observer_id, count in observer_discovs.items():
     cur.execute("""
         UPDATE observer
-        SET discovs = %s
-        WHERE observer_id = %s;
+        SET discovs = \%s
+        WHERE observer_id = \%s;
     """, (
         count,
         observer_id
@@ -1393,6 +1393,7 @@ CREATE TABLE observation (
 
 \section*{Приложение Б. Исходный текст программы генерации тестовых данных}
 \addcontentsline{toc}{section}{Приложение Б. Исходный текст программы генерации тестовых данных}
+\label{b}
 
 \begin{Code}
 import psycopg2
