@@ -729,7 +729,11 @@
 	\restoregeometry
 \clearpage
 
-\subsection{Описание программы генерации данных}
+\newpage
+
+\section{Программирование}
+
+\subsection{Генерация тестовых данных}
 
 Для заполнения базы данных использовался язык программирования Python и библиотека \textit{psycopg2}, предназначенная для подключения к PostgreSQL и выполнения SQL-запросов из Python-программы. Для генерации фиктивных данных применялась стандартная библиотека \textit{random}, а для работы с календарными датами использовались классы \textit{date} и \textit{timedelta} из модуля \textit{datetime}.
 
@@ -1163,6 +1167,144 @@ for observer_id, count in observer_discovs.items():
 		\caption{Заполнение таблицы в консоли.}
 		\label{generation}
 	\end{figure}
+
+Как видно на рис. \ref{generation}, в таблице содержится 273~166 записей.
+
+Полный текст программы генерации тестовых данных приведён в разделе \hyperref[b][Приложение Б].
+
+\subsection{Запросы}
+
+Все запросы выполнялись в СУБД PostgreSQL 
+
+\subsubsection{Запрос 1}
+
+Запрос: "Найти все телескопы, которые наблюдали тип экзопланет A в галактике B вокруг звёзд класса C".
+
+Были выбраны следующие поля для поиска:
+
+\begin{itemize}
+  \item A --- terrestrial;
+  \item B --- GAL_0001;
+  \item C --- G.
+\end{itemize}
+
+Фрагмент результата выполнения запроса:
+
+\begin{Code}
+
+\end{Code}
+
+
+\subsubsection{Запрос 2}
+
+Запрос:
+
+Были выбраны следующие поля для поиска:
+
+\begin{itemize}
+  \item A
+  \item B
+  \item C
+\end{itemize}
+
+\subsubsection{Запрос 3}
+
+Запрос:
+
+Были выбраны следующие поля для поиска:
+
+\begin{itemize}
+  \item A
+  \item B
+  \item C
+\end{itemize}
+
+\subsubsection{Запрос 4.1}
+
+Запрос:
+
+Были выбраны следующие поля для поиска:
+
+\begin{itemize}
+  \item A
+  \item B
+  \item C
+\end{itemize}
+
+\subsubsection{Запрос 4.2}
+
+Запрос:
+
+Были выбраны следующие поля для поиска:
+
+\begin{itemize}
+  \item A
+  \item B
+  \item C
+\end{itemize}
+
+\subsubsection{Запрос 5}
+
+Запрос:
+
+Были выбраны следующие поля для поиска:
+
+\begin{itemize}
+  \item A
+  \item B
+  \item C
+\end{itemize}
+
+\subsubsection{Запрос 6}
+
+Запрос:
+
+Были выбраны следующие поля для поиска:
+
+\begin{itemize}
+  \item A
+  \item B
+  \item C
+\end{itemize}
+
+\subsubsection{Запрос 7}
+
+Запрос:
+
+Были выбраны следующие поля для поиска:
+
+\begin{itemize}
+  \item A
+  \item B
+  \item C
+\end{itemize}
+
+\subsubsection{Запрос 8}
+
+Запрос:
+
+Были выбраны следующие поля для поиска:
+
+\begin{itemize}
+  \item A
+  \item B
+  \item C
+\end{itemize}
+
+\subsubsection{Запрос 9}
+
+Запрос:
+
+Были выбраны следующие поля для поиска:
+
+\begin{itemize}
+  \item A
+  \item B
+  \item C
+\end{itemize}
+
+
+\newpage
 
 \begin{thebibliography}{9}
 		\bibitem{exoplanet} NASA. Exoplanets - NASA Science [Электронный ресурс] / Chelsea Gohd, Diana Logreira --- URL: \url{https://science.nasa.gov/exoplanets/} (дата обращения: 05.02.2026).
