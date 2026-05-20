@@ -1,3 +1,6 @@
+# Посчитать число экзопланет с равным числом наблюдений,
+# построить 2D-гистограмму.
+
 import argparse
 import csv
 from getpass import getpass

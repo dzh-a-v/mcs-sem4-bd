@@ -1,3 +1,6 @@
+# Найти все телескопы, которые наблюдали тип экзопланет "terrestrial"
+# в галактике GAL_0001 вокруг звёзд класса G.
+
 import argparse
 import csv
 from getpass import getpass

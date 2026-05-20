@@ -1,3 +1,6 @@
+# Найти галактику, в которой не наблюдалось ни одной звезды
+# выбранным типом телескопа.
+
 import argparse
 import csv
 from getpass import getpass

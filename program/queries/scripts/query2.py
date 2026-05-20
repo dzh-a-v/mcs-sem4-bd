@@ -1,3 +1,6 @@
+# Для наблюдателя Observer_000001 посчитать число звёзд,
+# которые он наблюдал в типе телескопа ground.
+
 import argparse
 import csv
 from getpass import getpass

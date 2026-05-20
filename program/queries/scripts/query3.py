@@ -1,3 +1,6 @@
+# Для каждого класса звезды посчитать число звёзд и число наблюдений,
+# построить 2D-гистограмму.
+
 import argparse
 import csv
 from getpass import getpass

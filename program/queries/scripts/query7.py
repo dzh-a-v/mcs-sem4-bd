@@ -1,3 +1,6 @@
+# Найти наблюдателей, которые наблюдали больше экзопланет,
+# чем наблюдатель Observer_000001.
+
 import argparse
 import csv
 from getpass import getpass
