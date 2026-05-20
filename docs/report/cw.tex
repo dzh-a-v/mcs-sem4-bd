@@ -39,6 +39,25 @@
 \usepackage{enumitem}
 \usepackage{fvextra}
 
+\usepackage{listings}
+\usepackage{xcolor}
+
+\lstset{
+    language=Python,
+    numbers=left,
+    numberstyle=\tiny,
+    stepnumber=1,
+    numbersep=5pt,
+    frame=single,
+    breaklines=true,
+    backgroundcolor=\color{white},
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{orange},
+    captionpos=b
+}
+
 \DefineVerbatimEnvironment{Code}{Verbatim}{
     fontsize=\small,
     breaklines=true,
@@ -739,14 +758,14 @@
 
 Программа выполняет подключение к базе данных, очищает существующие таблицы, генерирует случайное количество записей в диапазоне от 200~000 до 300~000, после чего последовательно заполняет таблицы в порядке, соответствующем иерархии внешних ключей.
 
-\begin{Code}
+\begin{lstlisting}
 import psycopg2
 from datetime import date, timedelta
 import random
 
 conn = psycopg2.connect(dbname="mydb", user="postgres")
 cur = conn.cursor()
-\end{Code}
+\end{lstlisting}
 
 \begin{center}
 Листинг 1 --- Подключение к базе данных
@@ -754,7 +773,7 @@ cur = conn.cursor()
 
 Перед генерацией новых данных выполняется очистка таблиц с помощью оператора \textit{TRUNCATE}. Таблицы перечислены в порядке от наиболее зависимых к родительским, а параметр \textit{CASCADE} позволяет завершать \textit{TRUNCATE} без ошибок, убирая связи между таблицами, чтобы не возникали ошибки.
 
-\begin{Code}
+\begin{lstlisting}
 cur.execute("""
     TRUNCATE TABLE
         observation,
@@ -768,7 +787,7 @@ cur.execute("""
         galaxy
     CASCADE;
 """)
-\end{Code}
+\end{lstlisting}
 
 \begin{center}
 Листинг 2 --- Очистка таблиц перед генерацией
@@ -776,7 +795,7 @@ cur.execute("""
 
 Для генерации значений используются вспомогательные функции. Функция \textit{random\_date} создаёт случайную дату в заданном диапазоне. Функция \textit{random\_decimal} возвращает случайное вещественное число без дополнительного округления в Python. Функция \textit{make\_id} формирует строковые идентификаторы объектов по заданному префиксу и номеру.
 
-\begin{Code}
+\begin{lstlisting}
 def random_date(start_date, end_date):
     days = (end_date - start_date).days
     return start_date + timedelta(days=random.randint(0, days))
@@ -788,7 +807,7 @@ def random_decimal(min_value, max_value):
 
 def make_id(prefix, number, width=5):
     return f"{prefix}_{number:0{width}d}"
-\end{Code}
+\end{lstlisting}
 
 \begin{center}
 Листинг 3 --- Вспомогательные функции генерации
@@ -796,7 +815,7 @@ def make_id(prefix, number, width=5):
 
 Количество записей в основных таблицах выбирается случайно. При этом программа контролирует итоговый объём данных: сумма записей должна находиться в диапазоне от 200~000 до 300~000 (задано константами). Количество наблюдений оценивается приблизительно как произведение количества экзопланет на среднее число наблюдений для одной экзопланеты.
 
-\begin{Code}
+\begin{lstlisting}
 TARGET_MIN = 200_000
 TARGET_MAX = 300_000
 
@@ -826,7 +845,7 @@ while True:
 
     if TARGET_MIN <= estimated_total <= TARGET_MAX:
         break
-\end{Code}
+\end{lstlisting}
 
 \begin{center}
 Листинг 4 --- Генерация случайного количества записей
@@ -834,7 +853,7 @@ while True:
 
 После выбора количества записей дополнительно проверяется выполнение ограничений предметной области. В каждом звёздном скоплении должно быть не менее десяти звёзд, не менее одной планетарной системы и не менее одной звёздной системы. Если случайно выбранные значения не удовлетворяют этим условиям, они автоматически увеличиваются до минимально допустимых.
 
-\begin{Code}
+\begin{lstlisting}
 if STARS_COUNT < CLUSTERS_COUNT * 10:
     STARS_COUNT = CLUSTERS_COUNT * 10
 
@@ -843,7 +862,7 @@ if PLAN_SYSTEMS_COUNT < CLUSTERS_COUNT:
 
 if STELLAR_SYSTEMS_COUNT < CLUSTERS_COUNT:
     STELLAR_SYSTEMS_COUNT = CLUSTERS_COUNT
-\end{Code}
+\end{lstlisting}
 
 \begin{center}
 Листинг 5 --- Проверка минимальных требований к иерархии
@@ -851,7 +870,7 @@ if STELLAR_SYSTEMS_COUNT < CLUSTERS_COUNT:
 
 Заполнение базы данных выполняется в шесть уровней. Сначала задаются справочные значения: типы телескопов, страны, типы экзопланет и классы звёзд. Так как в данной реализации эти значения представлены перечислениями и списками Python, отдельные INSERT-запросы для них не выполняются. На этом же уровне создаются галактики, так как они являются верхним уровнем космической иерархии и не зависят от других таблиц.
 
-\begin{Code}
+\begin{lstlisting}
 tele_types = ['space', 'ground']
 
 exo_types = [
@@ -864,7 +883,7 @@ exo_types = [
 star_classes = [
     'O', 'B', 'A', 'F', 'G', 'K', 'M', 'W', 'L', 'D'
 ]
-\end{Code}
+\end{lstlisting}
 
 \begin{center}
 Листинг 6 --- Справочные значения
@@ -872,7 +891,7 @@ star_classes = [
 
 На первом уровне после задания справочных значений заполняется таблица галактик. Для каждой галактики создаётся строковый идентификатор, количество подтверждённых планет, количество планет в зоне обитаемости и расстояние. Количество обитаемых планет генерируется так, чтобы оно не превышало количество подтверждённых планет.
 
-\begin{Code}
+\begin{lstlisting}
 galaxy_ids = []
 
 for i in range(1, GALAXIES_COUNT + 1):
@@ -893,7 +912,7 @@ for i in range(1, GALAXIES_COUNT + 1):
     ))
 
     galaxy_ids.append(galaxy_id)
-\end{Code}
+\end{lstlisting}
 
 \begin{center}
 Листинг 7 --- Вставка галактик
@@ -901,7 +920,7 @@ for i in range(1, GALAXIES_COUNT + 1):
 
 На втором уровне заполняются телескопы, наблюдатели и звёздные скопления. Телескопы и наблюдатели не зависят от космической иерархии, поэтому могут быть созданы до экзопланет и наблюдений. Звёздные скопления создаются после галактик, так как каждое скопление содержит внешний ключ на галактику.
 
-\begin{Code}
+\begin{lstlisting}
 cur.execute("""
     INSERT INTO telescope
     (tele_id, tele_type, aper, com_year, oper, discov_plan)
@@ -914,7 +933,7 @@ cur.execute("""
     make_id("OPERATOR", random.randint(1, 9999), 5),
     0
 ))
-\end{Code}
+\end{lstlisting}
 
 \begin{center}
 Листинг 8 --- Вставка телескопа
@@ -922,7 +941,7 @@ cur.execute("""
 
 При создании наблюдателей генерируются идентификатор, дата рождения, страна и начальное количество открытий. Количество открытий изначально равно нулю, а затем пересчитывается после генерации наблюдений.
 
-\begin{Code}
+\begin{lstlisting}
 cur.execute("""
     INSERT INTO observer
     (observer_id, bday, country, discovs)
@@ -933,7 +952,7 @@ cur.execute("""
     random.choice(countries),
     0
 ))
-\end{Code}
+\end{lstlisting}
 
 \begin{center}
 Листинг 9 --- Вставка наблюдателя
@@ -941,7 +960,7 @@ cur.execute("""
 
 При создании звёздных скоплений используется внешний ключ \textit{galaxy\_id}. Для этого идентификаторы ранее созданных галактик сохраняются в списке \textit{galaxy\_ids}, после чего выбираются идентификаторы оттуда.
 
-\begin{Code}
+\begin{lstlisting}
 cur.execute("""
     INSERT INTO cluster
     (cluster_id, stars_count, conf_plan, hab_plan, dist, galaxy_id)
@@ -954,7 +973,7 @@ cur.execute("""
     random_decimal(0, 500000),
     random.choice(galaxy_ids)
 ))
-\end{Code}
+\end{lstlisting}
 
 \begin{center}
 Листинг 10 --- Вставка звёздного скопления
@@ -962,7 +981,7 @@ cur.execute("""
 
 На третьем уровне заполняются звёздные системы. Для выполнения требования о наличии хотя бы одной звёздной системы в каждом скоплении сначала создаётся по одной системе для каждого кластера. Затем остальные звёздные системы распределяются между скоплениями случайным образом. Для дальнейшего использования сохраняются связи между звёздными системами и скоплениями.
 
-\begin{Code}
+\begin{lstlisting}
 stellar_ids = []
 stellar_to_cluster = {}
 cluster_stellar_ids = {cluster_id: [] for cluster_id in cluster_ids}
@@ -989,7 +1008,7 @@ for cluster_id in cluster_ids:
     stellar_ids.append(stellar_id)
     stellar_to_cluster[stellar_id] = cluster_id
     cluster_stellar_ids[cluster_id].append(stellar_id)
-\end{Code}
+\end{lstlisting}
 
 \begin{center}
 Листинг 11 --- Вставка звёздных систем
@@ -997,7 +1016,7 @@ for cluster_id in cluster_ids:
 
 На четвёртом уровне создаются планетарные системы. Для каждого звёздного скопления создаётся минимум одна планетарная система, связанная с одной из звёздных систем этого скопления. Это гарантирует логичность и корректность распределения данных. %Затем оставшиеся планетарные системы распределяются случайно между уже существующими звёздными системами.
 
-\begin{Code}
+\begin{lstlisting}
 plan_system_ids = []
 plan_system_to_cluster = {}
 cluster_plan_system_ids = {cluster_id: [] for cluster_id in cluster_ids}
@@ -1025,7 +1044,7 @@ for cluster_id in cluster_ids:
     plan_system_ids.append(system_id)
     plan_system_to_cluster[system_id] = cluster_id
     cluster_plan_system_ids[cluster_id].append(system_id)
-\end{Code}
+\end{lstlisting}
 
 \begin{center}
 Листинг 12 --- Вставка планетарных систем
@@ -1033,7 +1052,7 @@ for cluster_id in cluster_ids:
 
 На пятом уровне заполняются таблицы звёзд и экзопланет. Они находятся на одном уровне иерархии, так как обе таблицы ссылаются на планетарную систему. Для звёзд сначала обеспечивается выполнение требования о наличии минимум десяти звёзд в каждом звёздном скоплении. Для этого звёзды создаются через планетарные системы, принадлежащие соответствующему скоплению.
 
-\begin{Code}
+\begin{lstlisting}
 for cluster_id in cluster_ids:
     for _ in range(10):
         star_id = make_id("STAR", star_counter, 6)
@@ -1043,7 +1062,7 @@ for cluster_id in cluster_ids:
 
         insert_star(star_id, system_id)
         star_ids.append(star_id)
-\end{Code}
+\end{lstlisting}
 
 \begin{center}
 Листинг 13 --- Создание минимум десяти звёзд на скопление
@@ -1051,7 +1070,7 @@ for cluster_id in cluster_ids:
 
 Параметры звезды зависят от её спектрального класса. Для каждого класса задаются собственные диапазоны массы, радиуса и температуры. %Это позволяет получать более правдоподобные данные, чем при полностью равномерной генерации всех физических характеристик.
 
-\begin{Code}
+\begin{lstlisting}
 def generate_star_params():
     star_class = random.choice(star_classes)
 
@@ -1065,7 +1084,7 @@ def generate_star_params():
         temp = random.randint(10000, 30000)
 ...
     return star_class, mass, radius, temp
-\end{Code}
+\end{lstlisting}
 
 \begin{center}
 Листинг 14 --- Генерация параметров звезды (полный код см. в разделе \hyperref[b][Приложение Б]).
@@ -1073,7 +1092,7 @@ def generate_star_params():
 
 Экзопланеты также генерируются с учётом типа. Для газовых гигантов, нептуновых планет, суперземель и планет земного типа используются разные диапазоны массы и радиуса. Дата последнего наблюдения генерируется так, чтобы она была не раньше даты открытия.
 
-\begin{Code}
+\begin{lstlisting}
 discov_date = random_date(date(1992, 1, 1), TODAY)
 last_obs_date = random_date(discov_date, TODAY)
 
@@ -1093,7 +1112,7 @@ cur.execute("""
     last_obs_date,
     random.choice(plan_system_ids)
 ))
-\end{Code}
+\end{lstlisting}
 
 \begin{center}
 Листинг 15 --- Вставка экзопланеты
@@ -1101,7 +1120,7 @@ cur.execute("""
 
 На шестом уровне создаются наблюдения. Таблица наблюдений заполняется последней, так как каждая её запись содержит внешние ключи на экзопланету, телескоп и наблюдателя. Для каждой экзопланеты создаётся случайное количество наблюдений от 1 до 7. Чтобы не нарушить ограничение уникальности события наблюдения, комбинация экзопланеты, телескопа, наблюдателя и даты сохраняется в множестве \textit{used\_observations}.
 
-\begin{Code}
+\begin{lstlisting}
 unique_key = (exo_id, tele_id, observer_id, obs_date)
 
 attempts = 0
@@ -1112,7 +1131,7 @@ while unique_key in used_observations and attempts < 20:
 
     unique_key = (exo_id, tele_id, observer_id, obs_date)
     attempts += 1
-\end{Code}
+\end{lstlisting}
 
 \begin{center}
 Листинг 16 --- Проверка уникальности наблюдения
@@ -1120,7 +1139,7 @@ while unique_key in used_observations and attempts < 20:
 
 После создания наблюдений выполняется обновление статистических полей. Для каждого телескопа пересчитывается количество открытых планет, а для каждого наблюдателя --- количество открытий. Эти значения накапливаются во время генерации наблюдений и затем записываются в соответствующие таблицы с помощью операторов \textit{UPDATE}.
 
-\begin{Code}
+\begin{lstlisting}
 for tele_id, count in telescope_discovs.items():
     cur.execute("""
         UPDATE telescope
@@ -1140,7 +1159,7 @@ for observer_id, count in observer_discovs.items():
         count,
         observer_id
     ))
-\end{Code}
+\end{lstlisting}
 
 \begin{center}
 Листинг 17 --- Обновление статистики телескопов и наблюдателей
@@ -1184,15 +1203,15 @@ for observer_id, count in observer_discovs.items():
 
 \begin{itemize}
   \item A --- terrestrial;
-  \item B --- GAL_0001;
+  \item B --- GAL\_0001;
   \item C --- G.
 \end{itemize}
 
 Фрагмент результата выполнения запроса:
 
-\begin{Code}
+\begin{lstlisting}
 
-\end{Code}
+\end{lstlisting}
 
 
 \subsubsection{Запрос 2}
@@ -1355,7 +1374,7 @@ for observer_id, count in observer_discovs.items():
 \section*{Приложение А. Исходный тест программы генерации базы данных}
 \addcontentsline{toc}{section}{Приложение А. Исходный тест программы генерации базы данных}
 
-\begin{Code}
+\begin{lstlisting}
 -- schema.sql
 
 -- ========================
@@ -1529,7 +1548,7 @@ CREATE TABLE observation (
     CONSTRAINT observation_unique_event
         UNIQUE (exo_id, tele_id, observer_id, obs_date)
 );
-\end{Code}
+\end{lstlisting}
 
 \newpage
 
@@ -1537,7 +1556,7 @@ CREATE TABLE observation (
 \addcontentsline{toc}{section}{Приложение Б. Исходный текст программы генерации тестовых данных}
 \label{b}
 
-\begin{Code}
+\begin{lstlisting}
 import psycopg2
 from datetime import date, timedelta
 import random
@@ -2243,6 +2262,6 @@ print(f"Всего записей: {total_records}")
 \# GROUP BY c.cluster_id
 \# HAVING COUNT(s.star_id) < 10;
 \# """)
-\end{Code}
+\end{lstlisting}
 
 \end{document}
