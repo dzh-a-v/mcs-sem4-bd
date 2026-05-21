@@ -227,19 +227,36 @@ ORDER BY observations_count DESC, t.tele_id, countries.country;
 
 -- Query 9.
 -- For all observations through telescope A of exoplanet B, change observer to C.
--- Replace TELE_00001, EXO_000001, and Observer_000001 with selected values.
+-- Selected values: A = TELE_00056, B = EXO_021009, C = Observer_000001.
 -- NOT EXISTS is used to avoid breaking the UNIQUE constraint on
 -- (exo_id, tele_id, observer_id, obs_date).
+-- A CTE is used to return both old and new observer values after the update.
 
+WITH rows_to_update AS (
+    SELECT
+        o.observation_id,
+        o.observer_id AS old_observer_id
+    FROM observation o
+    WHERE o.tele_id = 'TELE_00056'
+      AND o.exo_id = 'EXO_021009'
+      AND o.observer_id <> 'Observer_000001'
+      AND NOT EXISTS (
+          SELECT 1
+          FROM observation duplicate
+          WHERE duplicate.exo_id = o.exo_id
+            AND duplicate.tele_id = o.tele_id
+            AND duplicate.observer_id = 'Observer_000001'
+            AND duplicate.obs_date = o.obs_date
+      )
+)
 UPDATE observation o
 SET observer_id = 'Observer_000001'
-WHERE o.tele_id = 'TELE_00001'
-  AND o.exo_id = 'EXO_000001'
-  AND NOT EXISTS (
-      SELECT 1
-      FROM observation duplicate
-      WHERE duplicate.exo_id = o.exo_id
-        AND duplicate.tele_id = o.tele_id
-        AND duplicate.observer_id = 'Observer_000001'
-        AND duplicate.obs_date = o.obs_date
-  );
+FROM rows_to_update old
+WHERE o.observation_id = old.observation_id
+RETURNING
+    o.observation_id,
+    o.exo_id,
+    o.tele_id,
+    old.old_observer_id,
+    o.observer_id AS new_observer_id,
+    o.obs_date;
