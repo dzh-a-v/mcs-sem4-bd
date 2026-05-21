@@ -1546,19 +1546,93 @@ ORDER BY observations_count DESC, t.tele_id, countries.country;
 
 Запрос: Для всех наблюдений через телескоп A, в которых наблюдается объект B, поменять наблюдения на наблюдения для наблюдателя C.
 
+Перед выполнением запроса был введён следующий запрос, чтобы найти такие телескопы, из которых одна экзопланета наблюдалась более 1 раза (листинг \ref{lst:q9prep}):
+
+\begin{lstlisting}[language=SQL, caption={Подготовка к девятому запросу.}, label={lst:q9prep}]
+SELECT
+    tele_id,
+    exo_id,
+    COUNT(*) AS observations_count
+FROM observation
+GROUP BY tele_id, exo_id
+HAVING COUNT(*) > 1
+ORDER BY observations_count DESC, tele_id, exo_id
+LIMIT 20;
+\end{lstlisting}
+
+Результат изображён на рис. \ref{q9prep}.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.85\linewidth]{images/queries/q9prep.png}
+	\caption{Результат запроса для подготовки к девятому запросу.}
+	\label{q9prep}
+\end{figure}
+
+Далее был выполнен запрос, чтобы понять, у каких наблюдателей сейчас эти наблюдения:
+
+\begin{lstlisting}[language=SQL, caption={Подготовка к девятому запросу.}, label={lst:q9prep2}]
+SELECT
+    observation_id,
+    exo_id,
+    tele_id,
+    observer_id,
+    obs_date
+FROM observation
+WHERE tele_id = 'TELE_00056'
+  AND exo_id = 'EXO_021009'
+ORDER BY obs_date, observation_id;
+\end{lstlisting}
+
+Результат выполнения второго подготовительного запроса приведён на рис. \ref{q9prep2}.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.85\linewidth]{images/queries/q9prep2.png}
+	\caption{Результат второго запроса для подготовки к девятому запросу.}
+	\label{q9prep2}
+\end{figure}
+
 Были выбраны следующие поля для поиска:
 
 \begin{itemize}
-  \item A --- [указать идентификатор телескопа];
-  \item B --- [указать идентификатор наблюдаемого объекта];
-  \item C --- [указать идентификатор наблюдателя].
+  \item A --- TELE\_00056;
+  \item B --- EXO\_021009;
+  \item C --- Observer\_000001 (как видно из рис. \ref{q9prep2}, у него сейчас нет этих наблюдений).
 \end{itemize}
 
-Текст запроса на SQL:
+Текст запроса на SQL приведён в листинге \ref{lst:q9t}.
 
-% \begin{lstlisting}[language=SQL, caption={Текст запроса №9}, label={lst:q9t}]
-% 
-% \end{lstlisting}
+\begin{lstlisting}[language=SQL, caption={Текст запроса №9}, label={lst:q9t}]
+WITH rows_to_update AS (
+    SELECT
+        o.observation_id,
+        o.observer_id AS old_observer_id
+    FROM observation o
+    WHERE o.tele_id = 'TELE_00056'
+      AND o.exo_id = 'EXO_021009'
+      AND o.observer_id <> 'Observer_000001'
+      AND NOT EXISTS (
+          SELECT 1
+          FROM observation duplicate
+          WHERE duplicate.exo_id = o.exo_id
+            AND duplicate.tele_id = o.tele_id
+            AND duplicate.observer_id = 'Observer_000001'
+            AND duplicate.obs_date = o.obs_date
+      )
+)
+UPDATE observation o
+SET observer_id = 'Observer_000001'
+FROM rows_to_update old
+WHERE o.observation_id = old.observation_id
+RETURNING
+    o.observation_id,
+    o.exo_id,
+    o.tele_id,
+    old.old_observer_id,
+    o.observer_id AS new_observer_id,
+    o.obs_date;
+\end{lstlisting}
 
 Фрагмент результата выполнения запроса:
 
