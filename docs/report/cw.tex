@@ -1569,6 +1569,8 @@ LIMIT 20;
 	\label{q9prep}
 \end{figure}
 
+Время выполнения запроса: 96.551 мс.
+
 Далее был выполнен запрос, чтобы понять, у каких наблюдателей сейчас эти наблюдения:
 
 \begin{lstlisting}[language=SQL, caption={Подготовка к девятому запросу.}, label={lst:q9prep2}]
@@ -1592,6 +1594,8 @@ ORDER BY obs_date, observation_id;
 	\caption{Результат второго запроса для подготовки к девятому запросу.}
 	\label{q9prep2}
 \end{figure}
+
+Время выполнения запроса: 1.178 мс.
 
 Были выбраны следующие поля для поиска:
 
@@ -1634,13 +1638,42 @@ RETURNING
     o.obs_date;
 \end{lstlisting}
 
-Фрагмент результата выполнения запроса:
+Время выполнения запроса: 25.008 мс.
 
-% \begin{lstlisting}[caption={Фрагмент результата выполнения девятого запроса}, label={lst:q9r}]
-% 
-% \end{lstlisting}
+На рис. \rec{q9change} видно сравнение старых и новых значений поля observer.
 
-Время выполнения запроса: 
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.85\linewidth]{images/queries/q9change.png}
+	\caption{Результат выполнения второго запроса (сравнение значений до и после).}
+	\label{q9change}
+\end{figure}
+
+Далее был введён ещё один запрос, чтобы проверить, что значения действительно обновились:
+
+\begin{lstlisting}[language=SQL, caption={Текст запроса №9}, label={lst:q9t}]
+SELECT
+    observation_id,
+    exo_id,
+    tele_id,
+    observer_id,
+    obs_date
+FROM observation
+WHERE tele_id = 'TELE_00056'
+  AND exo_id = 'EXO_021009'
+ORDER BY obs_date, observation_id;
+\end{lstlisting}
+
+Как видно на рис. \ref{q9r}, значения в таблице действительно обновились.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.85\linewidth]{images/queries/q9r.png}
+	\caption{Проверка изменённых значений в таблице после девятого запроса.}
+	\label{q9r}
+\end{figure}
+
+Время выполнения запроса: 1.093 мс.
 
 
 \newpage
