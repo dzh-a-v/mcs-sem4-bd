@@ -10,7 +10,7 @@ import psycopg2
 
 
 QUERY = """
-WITH observer_counts AS (
+WITH observer_counts AS MATERIALIZED (
     SELECT
         obs.observer_id,
         obs.country::text AS country,
@@ -19,21 +19,17 @@ WITH observer_counts AS (
     LEFT JOIN observation o
         ON o.observer_id = obs.observer_id
     GROUP BY obs.observer_id, obs.country
-),
-target_observer AS (
-    SELECT exoplanets_count
-    FROM observer_counts
-    WHERE observer_id = %s
 )
 SELECT
     oc.observer_id,
     oc.country,
     oc.exoplanets_count,
-    target_observer.exoplanets_count AS target_exoplanets_count
+    target.exoplanets_count AS target_exoplanets_count
 FROM observer_counts oc
-CROSS JOIN target_observer
-WHERE oc.observer_id <> %s
-  AND oc.exoplanets_count > target_observer.exoplanets_count
+JOIN observer_counts target
+    ON target.observer_id = %s
+WHERE oc.observer_id <> target.observer_id
+  AND oc.exoplanets_count > target.exoplanets_count
 ORDER BY oc.exoplanets_count DESC, oc.observer_id;
 """
 
@@ -85,7 +81,7 @@ def main():
 
     with connect(args) as conn:
         with conn.cursor() as cur:
-            cur.execute(QUERY, (args.observer, args.observer))
+            cur.execute(QUERY, (args.observer,))
             rows = cur.fetchall()
             headers = [column[0] for column in cur.description]
 

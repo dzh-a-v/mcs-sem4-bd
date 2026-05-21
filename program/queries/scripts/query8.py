@@ -12,22 +12,27 @@ import psycopg2
 
 
 QUERY = """
+WITH observed_counts AS MATERIALIZED (
+    SELECT
+        o.tele_id,
+        obs.country,
+        COUNT(*) AS observations_count
+    FROM observation o
+    JOIN observer obs
+        ON obs.observer_id = o.observer_id
+    GROUP BY o.tele_id, obs.country
+)
 SELECT
     t.tele_id,
     t.tele_type::text AS tele_type,
     t.oper,
-    obs.country::text AS country,
-    COUNT(o.observation_id) AS observations_count
+    countries.country::text AS country,
+    COALESCE(oc.observations_count, 0) AS observations_count
 FROM telescope t
-JOIN observation o
-    ON o.tele_id = t.tele_id
-JOIN observer obs
-    ON obs.observer_id = o.observer_id
-GROUP BY
-    t.tele_id,
-    t.tele_type,
-    t.oper,
-    obs.country
+CROSS JOIN unnest(enum_range(NULL::country_enum)) AS countries(country)
+LEFT JOIN observed_counts oc
+    ON oc.tele_id = t.tele_id
+   AND oc.country = countries.country
 ORDER BY observations_count DESC, t.tele_id, country;
 """
 

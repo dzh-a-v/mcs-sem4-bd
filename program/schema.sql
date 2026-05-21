@@ -171,3 +171,9 @@ CREATE TABLE observation (
     CONSTRAINT observation_unique_event
         UNIQUE (exo_id, tele_id, observer_id, obs_date)
 );
+
+CREATE INDEX idx_observation_observer_exo
+    ON observation(observer_id, exo_id);
+
+CREATE INDEX idx_observation_tele_observer
+    ON observation(tele_id, observer_id);
