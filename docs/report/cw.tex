@@ -142,21 +142,21 @@
 	
 	\section{Постановка задачи}
 	
-	\textbf{Цель работы:} реализация функционирующей реляционной базы данных для выбранной предметной области и заданных SQL-запросов.
+	\textbf{Цель работы:} реализация функционирующей реляционной базы данных для предметной области <<Каталогизация экзопланет>> и выполнение заданных SQL-запросов.
 	
 	\textbf{Задачи работы:}
 	\begin{enumerate}
-		\item Проанализировать предметную область.
-		\item Сформировать цели функцинонирования базы данных (мин. 3), процессы (мин. 1), перечень ролей (мин. 3), сущностей (мин. 7) и их атрибутов (мин. 4 для каждой сущности).
-		\item Создать ER-диаграмму и изобразить её в нотации Чена.
-		\item Сформировать схему связи объектов (мин. 6 объектов).
-		\item Создать таблицы с описанием таблиц базы данных.
-		\item Сформулировать лингвистическое описание схемы базы данных.
-		\item Графически описать схемы базы данных на русском и английском языках.
-		\item Написать текст программы генерации базы данных.
-		\item Сгенерировать базу данных, содержащую не менее 250 тыс. записей.
-		\item Реализовать персональные SQL-запросы.
-		\item Сформировать последовательность выполнения запросов.
+		\item проанализировать предметную область каталогизации экзопланет;
+		\item определить цели функционирования базы данных;
+		\item выявить сущности, их атрибуты и связи;
+		\item построить ER-диаграмму в нотации Чена;
+		\item спроектировать схему базы данных и описать таблицы;
+		\item перенести схему в СУБД PostgreSQL;
+		\item реализовать программу заполнения базы данных тестовыми данными;
+		\item сгенерировать базу данных объёмом не менее 250 тыс. записей;
+		\item выполнить SQL-запросы к базе данных;
+		\item сформировать реляционные формулы и последовательности выполнения запросов;
+		\item построить графическое представление результатов запросов.
 	\end{enumerate}
 	
 	\newpage
@@ -2022,24 +2022,16 @@ RETURNING
 
 \[
 \begin{aligned}
-&\pi_{\substack{
-    \mathrm{observation\_id},\mathrm{exo\_id},\mathrm{tele\_id};\\
-    \mathrm{old\_observer\_id},\mathrm{new\_observer\_id},\mathrm{obs\_date}
-}}\Big(\\
-&\quad \operatorname{UPDATE}_{\mathrm{observer\_id}\leftarrow\mathrm{Observer\_000001}}\Big(\\
-&\quad\quad \sigma_{\substack{
-    \mathrm{tele\_id}=\mathrm{TELE\_00056}\ \land\\
-    \mathrm{exo\_id}=\mathrm{EXO\_021009}\ \land\\
-    \mathrm{observer\_id}\neq\mathrm{Observer\_000001}
-}}\big(\mathrm{observation}\big)\\
-&\quad\quad \setminus\ \pi_{\operatorname{attrs}(\mathrm{observation})}\Big(\\
-&\quad\quad\quad \sigma_{\substack{
-    \mathrm{tele\_id}=\mathrm{TELE\_00056}\ \land\\
-    \mathrm{exo\_id}=\mathrm{EXO\_021009}
-}}\big(\mathrm{observation}\big)\\
-&\quad\quad\quad \bowtie_{\mathrm{exo\_id},\mathrm{tele\_id},\mathrm{obs\_date}}\,
-    \sigma_{\mathrm{observer\_id}=\mathrm{Observer\_000001}}\big(\mathrm{observation}\big)
-\Big)\Big)\Big).
+&\pi_{\mathrm{observation\_id, exo\_id, tele\_id; old\_observer\_id, new\_observer\_id, obs\_date}}\Big(\\
+&\quad \operatorname{UPDATE}_{\mathrm{observer\_id} \leftarrow \mathrm{Observer\_000001}}\Big(\\
+&\quad\quad \sigma_{\mathrm{tele\_id = TELE\_00056 \land exo\_id = EXO\_021009 \land observer\_id \neq Observer\_000001}}\big(\mathrm{observation}\big)\\
+&\quad\quad \setminus\
+\pi_{\operatorname{attrs}(\mathrm{observation})}\Big(\\
+&\quad\quad\quad \sigma_{\mathrm{tele\_id = TELE\_00056 \land exo\_id = EXO\_021009}}\big(\mathrm{observation}\big)\\
+&\quad\quad\quad \ \bowtie_{\mathrm{exo\_id, tele\_id, obs\_date}}
+\sigma_{\mathrm{observer\_id = Observer\_000001}}\big(\mathrm{observation}\big)
+\Big)\Big)\\
+&\Big)
 \end{aligned}
 \]
 
