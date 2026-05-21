@@ -2,7 +2,6 @@ SELECT
     observations_count,
     COUNT(*) AS exoplanets_count
 FROM (
-    -- количество наблюдений для каждого экзопланеты
     SELECT
         e.exo_id,
         COUNT(o.observation_id) AS observations_count
