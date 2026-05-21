@@ -4,28 +4,17 @@ SELECT
     g.hab_plan,
     g.dist,
     'ground'::tele_type_enum AS tele_type,
-    COUNT(DISTINCT CASE WHEN t.tele_id IS NOT NULL THEN s.star_id END)
-        AS observed_stars_count
+    0 AS observed_stars_count
 FROM galaxy g
-LEFT JOIN cluster c
-    ON c.galaxy_id = g.galaxy_id
-LEFT JOIN stellar_system ss
-    ON ss.cluster_id = c.cluster_id
-LEFT JOIN plan_system ps
-    ON ps.stell_sys_id = ss.stellar_id
-LEFT JOIN star s
-    ON s.sys_id = ps.system_id
-LEFT JOIN exoplanet e
-    ON e.sys_id = ps.system_id
-LEFT JOIN observation o
-    ON o.exo_id = e.exo_id
-LEFT JOIN telescope t
-    ON t.tele_id = o.tele_id
-   AND t.tele_type = 'ground'
-GROUP BY
-    g.galaxy_id,
-    g.conf_plan,
-    g.hab_plan,
-    g.dist
-HAVING COUNT(DISTINCT CASE WHEN t.tele_id IS NOT NULL THEN s.star_id END) = 0
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM cluster c
+    JOIN stellar_system ss ON ss.cluster_id = c.cluster_id
+    JOIN plan_system ps ON ps.stell_sys_id = ss.stellar_id
+    JOIN star s ON s.sys_id = ps.system_id
+    JOIN exoplanet e ON e.sys_id = ps.system_id
+    JOIN observation o ON o.exo_id = e.exo_id
+    JOIN telescope t ON t.tele_id = o.tele_id AND t.tele_type = 'ground'
+    WHERE c.galaxy_id = g.galaxy_id
+)
 ORDER BY g.galaxy_id;
