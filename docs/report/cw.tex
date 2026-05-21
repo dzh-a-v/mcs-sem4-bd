@@ -1138,9 +1138,7 @@ SELECT
     t.aper,
     t.com_year,
     t.oper,
-    t.discov_plan,
-    COUNT(DISTINCT o.observation_id) AS observations_count,
-    COUNT(DISTINCT e.exo_id) AS exoplanets_count
+    t.discov_plan
 FROM telescope t
 JOIN observation o
     ON o.tele_id = t.tele_id
@@ -1167,14 +1165,15 @@ GROUP BY
     t.oper,
     t.discov_plan
 ORDER BY t.tele_id;
+
 \end{lstlisting}
 
 Реляционная формула запроса:
 
-[
+\[
 \begin{aligned}
 &\tau_{\mathrm{tele_id}}\Big(\
-&\quad \gamma_{\mathrm{tele_id, tele_type, aper, com_year, oper, discov_plan; COUNTD(observation_id), COUNTD(exo_id)}}\Big(\
+&\quad \gamma_{\mathrm{tele_id, tele_type, aper, com_year, oper, discov_plan;}}\Big(\
 &\quad\quad \sigma_{\mathrm{exo_type = terrestrial \land galaxy_id = GAL_0001 \land class = G}}\Big(\
 &\quad\quad\quad \mathrm{telescope}\
 &\quad\quad\quad \bowtie_{\mathrm{tele_id}} \mathrm{observation}\
@@ -1188,7 +1187,7 @@ ORDER BY t.tele_id;
 &\quad\Big)\
 &\Big)
 \end{aligned}
-]
+\]
 
 Последовательность выполнения запроса приведена в табл. \ref{tab:q1plan}.
 
@@ -1222,7 +1221,7 @@ ORDER BY t.tele_id;
 	\label{q1r}
 \end{figure}
 
-Время выполнения запроса: 24.734 мс.
+Время выполнения запроса: 19.875 мс.
 
 \subsubsection{Запрос 2}
 
@@ -1398,32 +1397,40 @@ ORDER BY s.class;
 Текст запроса на SQL приведён в листинге \ref{lst:q41t}.
 
 \begin{lstlisting}[language=SQL, caption={Текст запроса №4.1}, label={lst:q41t}]
-SELECT
-    obs.country,
-    COUNT(DISTINCT o.exo_id) AS exoplanets_count
-FROM observer obs
-JOIN observation o
-    ON o.observer_id = obs.observer_id
-GROUP BY obs.country
-ORDER BY exoplanets_count DESC
-FETCH FIRST 1 ROW WITH TIES;
+SELECT country, exoplanets_count
+FROM (
+    SELECT
+        obs.country,
+        COUNT(DISTINCT o.exo_id) AS exoplanets_count
+    FROM observer obs
+    JOIN observation o ON o.observer_id = obs.observer_id
+    GROUP BY obs.country
+)
+WHERE exoplanets_count = (
+    SELECT MAX(exoplanets_count)
+    FROM (
+        SELECT COUNT(DISTINCT o2.exo_id) AS exoplanets_count
+        FROM observation o2
+        JOIN observer obs2 ON obs2.observer_id = o2.observer_id
+        GROUP BY obs2.country
+    )
+)
+ORDER BY exoplanets_count DESC;
 \end{lstlisting}
 
 Реляционная формула запроса:
 
 \[
 \begin{aligned}
-&\lambda_{1}^{\mathrm{ties}}\Big(\
-&\quad \tau_{\mathrm{exoplanets_count}\downarrow}\Big(\
-&\quad\quad \gamma_{\mathrm{country; COUNTD(exo_id) \rightarrow exoplanets_count}}\Big(\
-&\quad\quad\quad \mathrm{observer}\
-&\quad\quad\quad \bowtie_{\mathrm{observer_id}} \mathrm{observation}\
-&\quad\quad\Big)\
-&\quad\Big)\
-&\Big)
+&\tau_{\mathrm{exoplanets\_count} \downarrow}\Bigg( \\
+&\quad \pi_{\mathrm{country},\, \mathrm{exoplanets\_count}}\Bigg( \\
+&\quad\quad \sigma_{\mathrm{exoplanets\_count} \geq \mathrm{all\_other\_counts}}\Bigg( \\
+&\quad\quad\quad \rho_{\mathrm{temp}}(\gamma_{\mathrm{country};\, \text{COUNTD}(\mathrm{exo\_id}) \to \mathrm{exoplanets\_count}}(\mathrm{observer} \bowtie_{\mathrm{observer\_id}} \mathrm{observation})) \\
+&\quad\quad \Bigg) \\
+&\quad \Bigg) \\
+&\Bigg)
 \end{aligned}
 \]
-
 
 Последовательность выполнения запроса приведена в табл. \ref{tab:q41plan}.
 
@@ -1456,7 +1463,7 @@ FETCH FIRST 1 ROW WITH TIES;
 	\label{q41r}
 \end{figure}
 
-Время выполнения запроса: 797.070 мс.
+Время выполнения запроса: 1106.565 мс.
 
 \subsubsection{Запрос 4.2}
 
@@ -1467,28 +1474,38 @@ FETCH FIRST 1 ROW WITH TIES;
 Текст запроса на SQL приведён в листинге \ref{lst:q42t}.
 
 \begin{lstlisting}[language=SQL, caption={Текст запроса №4.2}, label={lst:q42t}]
-SELECT
-    obs.country,
-    COUNT(DISTINCT o.exo_id) AS exoplanets_count
-FROM observer obs
-JOIN observation o
-    ON o.observer_id = obs.observer_id
-GROUP BY obs.country
-ORDER BY exoplanets_count ASC
-FETCH FIRST 1 ROW WITH TIES;
+SELECT country, exoplanets_count
+FROM (
+    SELECT
+        obs.country,
+        COUNT(DISTINCT o.exo_id) AS exoplanets_count
+    FROM observer obs
+    JOIN observation o ON o.observer_id = obs.observer_id
+    GROUP BY obs.country
+)
+WHERE exoplanets_count = (
+    SELECT MIN(exoplanets_count)
+    FROM (
+        SELECT COUNT(DISTINCT o2.exo_id) AS exoplanets_count
+        FROM observation o2
+        JOIN observer obs2 ON obs2.observer_id = o2.observer_id
+        GROUP BY obs2.country
+    )
+)
+ORDER BY exoplanets_count DESC;
 \end{lstlisting}
 
 Реляционная формула запроса:
 
 \[
 \begin{aligned}
-&\lambda_{1}^{\mathrm{ties}}\Big(\
-&\quad \tau_{\mathrm{exoplanets_count}\uparrow}\Big(\
-&\quad\quad \gamma_{\mathrm{country; COUNTD(exo_id) \rightarrow exoplanets_count}}\Big(\
-&\quad\quad\quad \mathrm{observer}\
-&\quad\quad\quad \bowtie_{\mathrm{observer_id}} \mathrm{observation}\
-&\quad\quad\Big)\
-&\quad\Big)\
+&\lambda_{1}^{\mathrm{ties}}\Big(\\
+&\quad \tau_{\mathrm{exoplanets_count}\uparrow}\Big(\\
+&\quad\quad \gamma_{\mathrm{country; COUNTD(exo_id) \rightarrow exoplanets_count}}\Big(\\
+&\quad\quad\quad \mathrm{observer}\\
+&\quad\quad\quad \bowtie_{\mathrm{observer_id}} \mathrm{observation}\\
+&\quad\quad\Big)\\
+&\quad\Big)\\
 &\Big)
 \end{aligned}
 \]
@@ -1514,8 +1531,6 @@ FETCH FIRST 1 ROW WITH TIES;
 	\end{tabularx}
 \end{table}
 
-Выполнение совпадает с предыдущим запросом до этапа сортировки: после подсчёта числа различных экзопланет по странам результат упорядочивается по возрастанию. Оператор \texttt{FETCH FIRST 1 ROW WITH TIES} оставляет все страны с минимальным числом наблюдавшихся экзопланет.
-
 Фрагмент результата выполнения запроса 4.2 приведён на рис. \ref{q42r}.
 
 \begin{figure}[H]
@@ -1525,7 +1540,7 @@ FETCH FIRST 1 ROW WITH TIES;
 	\label{q42r}
 \end{figure}
 
-Время выполнения запроса: 446.087 мс.
+Время выполнения запроса: 1102.927 мс.
 
 \subsubsection{Запрос 5}
 
@@ -1536,7 +1551,11 @@ FETCH FIRST 1 ROW WITH TIES;
 Текст запроса на SQL приведён в листинге \ref{lst:q5t}.
 
 \begin{lstlisting}[language=SQL, caption={Текст запроса №5}, label={lst:q5t}]
-WITH exoplanet_observations AS (
+SELECT
+    observations_count,
+    COUNT(*) AS exoplanets_count
+FROM (
+    -- количество наблюдений для каждого экзопланеты
     SELECT
         e.exo_id,
         COUNT(o.observation_id) AS observations_count
@@ -1544,30 +1563,25 @@ WITH exoplanet_observations AS (
     LEFT JOIN observation o
         ON o.exo_id = e.exo_id
     GROUP BY e.exo_id
-)
-SELECT
-    observations_count,
-    COUNT(*) AS exoplanets_count
-FROM exoplanet_observations
+) AS exoplanet_observations 
 GROUP BY observations_count
 ORDER BY observations_count;
 \end{lstlisting}
 
 Реляционная формула запроса:
 
-[
+\[
 \begin{aligned}
-&\tau_{\mathrm{observations_count}}\Big(\
-&\quad \gamma_{\mathrm{observations_count; COUNT(*) \rightarrow exoplanets_count}}\Big(\
-&\quad\quad \gamma_{\mathrm{exo_id; COUNT(observation_id) \rightarrow observations_count}}\Big(\
-&\quad\quad\quad \mathrm{exoplanet}\
-&\quad\quad\quad \mathbin{\operatorname{LEFTJOIN}}_{\mathrm{exo_id}} \mathrm{observation}\
-&\quad\quad\Big)\
-&\quad\Big)\
+&\tau_{\mathrm{observations_count}}\Big(\\
+&\quad \gamma_{\mathrm{observations_count; COUNT(*) \rightarrow exoplanets_count}}\Big(\\
+&\quad\quad \gamma_{\mathrm{exo_id; COUNT(observation_id) \rightarrow observations_count}}\Big(\\
+&\quad\quad\quad \mathrm{exoplanet}\\
+&\quad\quad\quad \mathbin{\operatorname{LEFTJOIN}}_{\mathrm{exo_id}} \mathrm{observation}\\
+&\quad\quad\Big)\\
+&\quad\Big)\\
 &\Big)
 \end{aligned}
-]
-
+\]
 
 Последовательность выполнения запроса приведена в табл. \ref{tab:q5plan}.
 
@@ -1609,7 +1623,7 @@ ORDER BY observations_count;
 	\label{q5h}
 \end{figure}
 
-Время выполнения запроса: 76.249 мс.
+Время выполнения запроса: 76.010 мс.
 
 \subsubsection{Запрос 6}
 
@@ -1659,24 +1673,24 @@ ORDER BY g.galaxy_id;
 
 Реляционная формула запроса:
 
-[
+\[
 \begin{aligned}
-&\tau_{\mathrm{galaxy_id}}\Big(\
-&\quad \sigma_{\mathrm{observed_stars_count} = 0}\Big(\
-&\quad\quad \gamma_{\mathrm{galaxy_id, conf_plan, hab_plan, dist; COUNTD(star_id) \rightarrow observed_stars_count}}\Big(\
-&\quad\quad\quad \mathrm{galaxy}\
-&\quad\quad\quad \mathbin{\operatorname{LEFTJOIN}}*{\mathrm{galaxy_id}} \mathrm{cluster}\
-&\quad\quad\quad \mathbin{\operatorname{LEFTJOIN}}*{\mathrm{cluster_id}} \mathrm{stellar_system}\
-&\quad\quad\quad \mathbin{\operatorname{LEFTJOIN}}*{\mathrm{stellar_id} = \mathrm{stell_sys_id}} \mathrm{plan_system}\
-&\quad\quad\quad \mathbin{\operatorname{LEFTJOIN}}*{\mathrm{system_id} = \mathrm{sys_id}} \mathrm{star}\
-&\quad\quad\quad \mathbin{\operatorname{LEFTJOIN}}*{\mathrm{system_id} = \mathrm{sys_id}} \mathrm{exoplanet}\
-&\quad\quad\quad \mathbin{\operatorname{LEFTJOIN}}*{\mathrm{exo_id}} \mathrm{observation}\
-&\quad\quad\quad \mathbin{\operatorname{LEFTJOIN}}_{\mathrm{tele_id} \land \mathrm{tele_type} = \mathrm{ground}} \mathrm{telescope}\
-&\quad\quad\Big)\
-&\quad\Big)\
+&\tau_{\mathrm{galaxy_id}}\Big(\\
+&\quad \sigma_{\mathrm{observed_stars_count} = 0}\Big(\\
+&\quad\quad \gamma_{\mathrm{galaxy_id, conf_plan, hab_plan, dist; COUNTD(star_id) \rightarrow observed_stars_count}}\Big(\\
+&\quad\quad\quad \mathrm{galaxy}\\
+&\quad\quad\quad \mathbin{\operatorname{LEFTJOIN}}*{\mathrm{galaxy_id}} \mathrm{cluster}\\
+&\quad\quad\quad \mathbin{\operatorname{LEFTJOIN}}*{\mathrm{cluster_id}} \mathrm{stellar_system}\\
+&\quad\quad\quad \mathbin{\operatorname{LEFTJOIN}}*{\mathrm{stellar_id} = \mathrm{stell_sys_id}} \mathrm{plan_system}\\
+&\quad\quad\quad \mathbin{\operatorname{LEFTJOIN}}*{\mathrm{system_id} = \mathrm{sys_id}} \mathrm{star}\\
+&\quad\quad\quad \mathbin{\operatorname{LEFTJOIN}}*{\mathrm{system_id} = \mathrm{sys_id}} \mathrm{exoplanet}\\
+&\quad\quad\quad \mathbin{\operatorname{LEFTJOIN}}*{\mathrm{exo_id}} \mathrm{observation}\\
+&\quad\quad\quad \mathbin{\operatorname{LEFTJOIN}}_{\mathrm{tele_id} \land \mathrm{tele_type} = \mathrm{ground}} \mathrm{telescope}\\
+&\quad\quad\Big)\\
+&\quad\Big)\\
 &\Big)
 \end{aligned}
-]
+\]
 
 Последовательность выполнения запроса приведена в табл. \ref{tab:q6plan}.
 
@@ -1751,7 +1765,7 @@ ORDER BY oc.exoplanets_count DESC, oc.observer_id;
 
 Реляционная формула запроса:
 
-[
+\[
 \begin{aligned}
 &\tau_{\mathrm{exoplanets_count}\downarrow, \mathrm{observer_id}}\Big(\
 &\quad \sigma_{\mathrm{observer_id} \neq \mathrm{target.observer_id} \land \mathrm{exoplanets_count} > \mathrm{target.exoplanets_count}}\Big(\
@@ -1767,7 +1781,7 @@ ORDER BY oc.exoplanets_count DESC, oc.observer_id;
 &\quad\quad\Big)\
 &\Big)\Big)
 \end{aligned}
-]
+\]
 
 
 Последовательность выполнения запроса приведена в табл. \ref{tab:q7plan}.
@@ -1839,7 +1853,7 @@ ORDER BY observations_count DESC, t.tele_id, countries.country;
 
 Реляционная формула запроса:
 
-[
+\[
 \begin{aligned}
 &\tau_{\mathrm{observations_count}\downarrow, \mathrm{tele_id}, \mathrm{country}}\Big(\
 &\quad \big(\mathrm{telescope} \times \operatorname{enum_range}(\mathrm{country_enum})\big)\
@@ -1850,7 +1864,7 @@ ORDER BY observations_count DESC, t.tele_id, countries.country;
 &\quad\Big)\
 &\Big)
 \end{aligned}
-]
+\]
 
 
 Последовательность выполнения запроса приведена в табл. \ref{tab:q8plan}.
@@ -1995,7 +2009,7 @@ RETURNING
 
 Реляционная формула запроса:
 
-[
+\[
 \begin{aligned}
 &\pi_{\mathrm{observation_id, exo_id, tele_id; old_observer_id, new_observer_id, obs_date}}\Big(\
 &\quad \operatorname{UPDATE}*{\mathrm{observer_id} \leftarrow \mathrm{Observer_000001}}\Big(\
@@ -2008,7 +2022,7 @@ RETURNING
 \Big)\Big)\
 &\Big)
 \end{aligned}
-]
+\]
 
 
 Последовательность выполнения запроса приведена в табл. \ref{tab:q9plan}.

@@ -1,4 +1,8 @@
-WITH exoplanet_observations AS (
+SELECT
+    observations_count,
+    COUNT(*) AS exoplanets_count
+FROM (
+    -- количество наблюдений для каждого экзопланеты
     SELECT
         e.exo_id,
         COUNT(o.observation_id) AS observations_count
@@ -6,10 +10,6 @@ WITH exoplanet_observations AS (
     LEFT JOIN observation o
         ON o.exo_id = e.exo_id
     GROUP BY e.exo_id
-)
-SELECT
-    observations_count,
-    COUNT(*) AS exoplanets_count
-FROM exoplanet_observations
+) AS exoplanet_observations 
 GROUP BY observations_count
 ORDER BY observations_count;
