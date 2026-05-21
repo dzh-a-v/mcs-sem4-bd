@@ -6,7 +6,7 @@ SELECT
     'ground'::tele_type_enum AS tele_type,
     0 AS observed_stars_count
 FROM galaxy g
-LEFT JOIN (
+JOIN (
     SELECT c.galaxy_id
     FROM cluster c
     JOIN stellar_system ss ON ss.cluster_id = c.cluster_id
