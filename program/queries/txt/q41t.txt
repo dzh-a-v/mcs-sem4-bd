@@ -1,9 +1,19 @@
-SELECT
-    obs.country,
-    COUNT(DISTINCT o.exo_id) AS exoplanets_count
-FROM observer obs
-JOIN observation o
-    ON o.observer_id = obs.observer_id
-GROUP BY obs.country
-ORDER BY exoplanets_count DESC
-FETCH FIRST 1 ROW WITH TIES;
+SELECT country, exoplanets_count
+FROM (
+    SELECT
+        obs.country,
+        COUNT(DISTINCT o.exo_id) AS exoplanets_count
+    FROM observer obs
+    JOIN observation o ON o.observer_id = obs.observer_id
+    GROUP BY obs.country
+)
+WHERE exoplanets_count = (
+    SELECT MAX(exoplanets_count)
+    FROM (
+        SELECT COUNT(DISTINCT o2.exo_id) AS exoplanets_count
+        FROM observation o2
+        JOIN observer obs2 ON obs2.observer_id = o2.observer_id
+        GROUP BY obs2.country
+    )
+)
+ORDER BY exoplanets_count DESC;
