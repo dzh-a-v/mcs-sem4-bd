@@ -4,9 +4,7 @@ SELECT
     t.aper,
     t.com_year,
     t.oper,
-    t.discov_plan,
-    COUNT(DISTINCT o.observation_id) AS observations_count,
-    COUNT(DISTINCT e.exo_id) AS exoplanets_count
+    t.discov_plan
 FROM telescope t
 JOIN observation o
     ON o.tele_id = t.tele_id
