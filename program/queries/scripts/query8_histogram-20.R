@@ -57,58 +57,157 @@ if (nrow(data) == 0) {
 
 data$tele_index <- as.integer(factor(data$tele_id, levels = top_telescopes))
 data$country_index <- as.integer(factor(data$country, levels = top_countries))
+data$observations_count <- as.numeric(data$observations_count)
+data <- data[!is.na(data$observations_count), ]
 
 max_count <- max(data$observations_count)
-colors <- grDevices::hcl.colors(nrow(data), palette = "Viridis")
+palette <- grDevices::hcl.colors(100, palette = "Viridis")
 
-make_bar <- function(x, y, z, color) {
-  x0 <- x - 0.35
-  x1 <- x + 0.35
-  y0 <- y - 0.35
-  y1 <- y + 0.35
-  z0 <- 0
-  z1 <- z
+if (max_count > min(data$observations_count)) {
+  color_index <- cut(
+    data$observations_count,
+    breaks = 100,
+    labels = FALSE,
+    include.lowest = TRUE
+  )
+} else {
+  color_index <- rep(50, nrow(data))
+}
 
-  vertices <- rbind(
-    c(x0, y0, z0), c(x1, y0, z0), c(x1, y1, z0), c(x0, y1, z0),
-    c(x0, y0, z1), c(x1, y0, z1), c(x1, y1, z1), c(x0, y1, z1)
+colors <- palette[color_index]
+
+close_rgl_devices <- function() {
+  while (rgl::rgl.cur() != 0) {
+    rgl::close3d()
+  }
+}
+
+make_bars_vertices <- function(plot_data) {
+  x0 <- plot_data$tele_index - 0.35
+  x1 <- plot_data$tele_index + 0.35
+  y0 <- plot_data$country_index - 0.35
+  y1 <- plot_data$country_index + 0.35
+  z0 <- rep(0, nrow(plot_data))
+  z1 <- plot_data$observations_count
+
+  vx <- cbind(x0, x1, x1, x0, x0, x1, x1, x0)
+  vy <- cbind(y0, y0, y1, y1, y0, y0, y1, y1)
+  vz <- cbind(z0, z0, z0, z0, z1, z1, z1, z1)
+
+  face_vertex_order <- c(
+    1, 2, 3, 4,
+    5, 8, 7, 6,
+    1, 5, 6, 2,
+    2, 6, 7, 3,
+    3, 7, 8, 4,
+    4, 8, 5, 1
   )
 
-  faces <- rbind(
-    c(1, 2, 3, 4),
-    c(5, 8, 7, 6),
-    c(1, 5, 6, 2),
-    c(2, 6, 7, 3),
-    c(3, 7, 8, 4),
-    c(4, 8, 5, 1)
-  )
-
-  rgl::quads3d(
-    vertices[as.vector(t(faces)), ],
-    col = color,
-    alpha = 0.9
+  cbind(
+    as.vector(t(vx[, face_vertex_order])),
+    as.vector(t(vy[, face_vertex_order])),
+    as.vector(t(vz[, face_vertex_order]))
   )
 }
 
+make_bar_edges <- function(plot_data) {
+  x0 <- plot_data$tele_index - 0.35
+  x1 <- plot_data$tele_index + 0.35
+  y0 <- plot_data$country_index - 0.35
+  y1 <- plot_data$country_index + 0.35
+  z0 <- rep(0, nrow(plot_data))
+  z1 <- plot_data$observations_count
+
+  vx <- cbind(x0, x1, x1, x0, x0, x1, x1, x0)
+  vy <- cbind(y0, y0, y1, y1, y0, y0, y1, y1)
+  vz <- cbind(z0, z0, z0, z0, z1, z1, z1, z1)
+
+  edge_vertex_order <- c(
+    1, 2, 2, 3, 3, 4, 4, 1,
+    5, 6, 6, 7, 7, 8, 8, 5,
+    1, 5, 2, 6, 3, 7, 4, 8
+  )
+
+  cbind(
+    as.vector(t(vx[, edge_vertex_order])),
+    as.vector(t(vy[, edge_vertex_order])),
+    as.vector(t(vz[, edge_vertex_order]))
+  )
+}
+
+draw_z_perimeter_grid <- function(x_count, y_count, max_z) {
+  x_min <- 0.5
+  x_max <- x_count + 0.5
+  y_min <- 0.5
+  y_max <- y_count + 0.5
+  z_levels <- pretty(c(0, max_z), n = 6)
+  z_levels <- z_levels[z_levels >= 0 & z_levels <= max_z]
+
+  for (z in z_levels) {
+    rgl::segments3d(
+      rbind(
+        c(x_min, y_min, z), c(x_max, y_min, z),
+        c(x_max, y_min, z), c(x_max, y_max, z),
+        c(x_max, y_max, z), c(x_min, y_max, z),
+        c(x_min, y_max, z), c(x_min, y_min, z)
+      ),
+      col = "gray78",
+      alpha = 0.65,
+      lwd = 1
+    )
+  }
+
+  rgl::segments3d(
+    rbind(
+      c(x_min, y_min, 0), c(x_min, y_min, max_z),
+      c(x_max, y_min, 0), c(x_max, y_min, max_z),
+      c(x_max, y_max, 0), c(x_max, y_max, max_z),
+      c(x_min, y_max, 0), c(x_min, y_max, max_z)
+    ),
+    col = "gray70",
+    alpha = 0.75,
+    lwd = 1
+  )
+
+  rgl::text3d(
+    x = x_max + 0.45,
+    y = y_min - 0.45,
+    z = z_levels,
+    texts = z_levels,
+    cex = 0.55,
+    adj = c(0, 0.5)
+  )
+
+  rgl::segments3d(
+    rbind(c(x_max, y_min, 0), c(x_max, y_min, max_z)),
+    col = "gray35",
+    lwd = 2
+  )
+}
+
+close_rgl_devices()
 rgl::open3d()
 rgl::bg3d(color = "white")
-
-for (i in seq_len(nrow(data))) {
-  make_bar(
-    data$tele_index[i],
-    data$country_index[i],
-    data$observations_count[i],
-    colors[i]
-  )
-}
-
-rgl::axes3d(edges = c("x--", "y--", "z"))
-rgl::title3d(
-  main = "Observations by telescope and country, first 20 by alphabet",
-  xlab = "Telescope",
-  ylab = "Country",
-  zlab = "Observations"
+rgl::material3d(specular = "gray35")
+draw_z_perimeter_grid(length(top_telescopes), length(top_countries), max_count)
+rgl::quads3d(
+  make_bars_vertices(data),
+  col = rep(colors, each = 6),
+  alpha = 0.9
 )
+rgl::segments3d(
+  make_bar_edges(data),
+  col = "white",
+  alpha = 0.95,
+  lwd = 1
+)
+
+# rgl::title3d(
+  # main = "Observations by telescope and country, first 20 by alphabet",
+  # xlab = "Telescope",
+  # ylab = "Country",
+  # zlab = "Observations"
+# )
 
 rgl::text3d(
   x = seq_along(top_telescopes),
