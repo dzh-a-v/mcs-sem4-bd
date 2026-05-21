@@ -758,7 +758,7 @@
 
 Программа выполняет подключение к базе данных, очищает существующие таблицы, генерирует случайное количество записей в диапазоне от 200~000 до 300~000, после чего последовательно заполняет таблицы в порядке, соответствующем иерархии внешних ключей.
 
-\begin{lstlisting}
+\begin{lstlisting}[caption={Подключение к базе данных}]
 import psycopg2
 from datetime import date, timedelta
 import random
@@ -767,13 +767,9 @@ conn = psycopg2.connect(dbname="mydb", user="postgres")
 cur = conn.cursor()
 \end{lstlisting}
 
-\begin{center}
-Листинг 1 --- Подключение к базе данных
-\end{center}
-
 Перед генерацией новых данных выполняется очистка таблиц с помощью оператора \textit{TRUNCATE}. Таблицы перечислены в порядке от наиболее зависимых к родительским, а параметр \textit{CASCADE} позволяет завершать \textit{TRUNCATE} без ошибок, убирая связи между таблицами, чтобы не возникали ошибки.
 
-\begin{lstlisting}
+\begin{lstlisting}[caption={Очистка таблиц перед генерацией}]
 cur.execute("""
     TRUNCATE TABLE
         observation,
@@ -789,13 +785,9 @@ cur.execute("""
 """)
 \end{lstlisting}
 
-\begin{center}
-Листинг 2 --- Очистка таблиц перед генерацией
-\end{center}
-
 Для генерации значений используются вспомогательные функции. Функция \textit{random\_date} создаёт случайную дату в заданном диапазоне. Функция \textit{random\_decimal} возвращает случайное вещественное число без дополнительного округления в Python. Функция \textit{make\_id} формирует строковые идентификаторы объектов по заданному префиксу и номеру.
 
-\begin{lstlisting}
+\begin{lstlisting}[caption={Вспомогательные функции генерации}]
 def random_date(start_date, end_date):
     days = (end_date - start_date).days
     return start_date + timedelta(days=random.randint(0, days))
@@ -809,13 +801,9 @@ def make_id(prefix, number, width=5):
     return f"{prefix}_{number:0{width}d}"
 \end{lstlisting}
 
-\begin{center}
-Листинг 3 --- Вспомогательные функции генерации
-\end{center}
-
 Количество записей в основных таблицах выбирается случайно. При этом программа контролирует итоговый объём данных: сумма записей должна находиться в диапазоне от 200~000 до 300~000 (задано константами). Количество наблюдений оценивается приблизительно как произведение количества экзопланет на среднее число наблюдений для одной экзопланеты.
 
-\begin{lstlisting}
+\begin{lstlisting}[caption={Генерация случайного количества записей}]
 TARGET_MIN = 200_000
 TARGET_MAX = 300_000
 
@@ -847,13 +835,9 @@ while True:
         break
 \end{lstlisting}
 
-\begin{center}
-Листинг 4 --- Генерация случайного количества записей
-\end{center}
-
 После выбора количества записей дополнительно проверяется выполнение ограничений предметной области. В каждом звёздном скоплении должно быть не менее десяти звёзд, не менее одной планетарной системы и не менее одной звёздной системы. Если случайно выбранные значения не удовлетворяют этим условиям, они автоматически увеличиваются до минимально допустимых.
 
-\begin{lstlisting}
+\begin{lstlisting}[caption={Проверка минимальных требований к иерархии}]
 if STARS_COUNT < CLUSTERS_COUNT * 10:
     STARS_COUNT = CLUSTERS_COUNT * 10
 
@@ -864,13 +848,9 @@ if STELLAR_SYSTEMS_COUNT < CLUSTERS_COUNT:
     STELLAR_SYSTEMS_COUNT = CLUSTERS_COUNT
 \end{lstlisting}
 
-\begin{center}
-Листинг 5 --- Проверка минимальных требований к иерархии
-\end{center}
-
 Заполнение базы данных выполняется в шесть уровней. Сначала задаются справочные значения: типы телескопов, страны, типы экзопланет и классы звёзд. Так как в данной реализации эти значения представлены перечислениями и списками Python, отдельные INSERT-запросы для них не выполняются. На этом же уровне создаются галактики, так как они являются верхним уровнем космической иерархии и не зависят от других таблиц.
 
-\begin{lstlisting}
+\begin{lstlisting}[caption={Справочные значения}]
 tele_types = ['space', 'ground']
 
 exo_types = [
@@ -885,13 +865,9 @@ star_classes = [
 ]
 \end{lstlisting}
 
-\begin{center}
-Листинг 6 --- Справочные значения
-\end{center}
-
 На первом уровне после задания справочных значений заполняется таблица галактик. Для каждой галактики создаётся строковый идентификатор, количество подтверждённых планет, количество планет в зоне обитаемости и расстояние. Количество обитаемых планет генерируется так, чтобы оно не превышало количество подтверждённых планет.
 
-\begin{lstlisting}
+\begin{lstlisting}[caption={Вставка галактик}]
 galaxy_ids = []
 
 for i in range(1, GALAXIES_COUNT + 1):
@@ -914,13 +890,9 @@ for i in range(1, GALAXIES_COUNT + 1):
     galaxy_ids.append(galaxy_id)
 \end{lstlisting}
 
-\begin{center}
-Листинг 7 --- Вставка галактик
-\end{center}
-
 На втором уровне заполняются телескопы, наблюдатели и звёздные скопления. Телескопы и наблюдатели не зависят от космической иерархии, поэтому могут быть созданы до экзопланет и наблюдений. Звёздные скопления создаются после галактик, так как каждое скопление содержит внешний ключ на галактику.
 
-\begin{lstlisting}
+\begin{lstlisting}[caption={Вставка телескопа}]
 cur.execute("""
     INSERT INTO telescope
     (tele_id, tele_type, aper, com_year, oper, discov_plan)
@@ -935,13 +907,9 @@ cur.execute("""
 ))
 \end{lstlisting}
 
-\begin{center}
-Листинг 8 --- Вставка телескопа
-\end{center}
-
 При создании наблюдателей генерируются идентификатор, дата рождения, страна и начальное количество открытий. Количество открытий изначально равно нулю, а затем пересчитывается после генерации наблюдений.
 
-\begin{lstlisting}
+\begin{lstlisting}[caption={Вставка наблюдателя}]
 cur.execute("""
     INSERT INTO observer
     (observer_id, bday, country, discovs)
@@ -954,13 +922,9 @@ cur.execute("""
 ))
 \end{lstlisting}
 
-\begin{center}
-Листинг 9 --- Вставка наблюдателя
-\end{center}
-
 При создании звёздных скоплений используется внешний ключ \textit{galaxy\_id}. Для этого идентификаторы ранее созданных галактик сохраняются в списке \textit{galaxy\_ids}, после чего выбираются идентификаторы оттуда.
 
-\begin{lstlisting}
+\begin{lstlisting}[caption={Вставка звёздного скопления}]
 cur.execute("""
     INSERT INTO cluster
     (cluster_id, stars_count, conf_plan, hab_plan, dist, galaxy_id)
@@ -975,13 +939,9 @@ cur.execute("""
 ))
 \end{lstlisting}
 
-\begin{center}
-Листинг 10 --- Вставка звёздного скопления
-\end{center}
-
 На третьем уровне заполняются звёздные системы. Для выполнения требования о наличии хотя бы одной звёздной системы в каждом скоплении сначала создаётся по одной системе для каждого кластера. Затем остальные звёздные системы распределяются между скоплениями случайным образом. Для дальнейшего использования сохраняются связи между звёздными системами и скоплениями.
 
-\begin{lstlisting}
+\begin{lstlisting}[caption={Вставка звёздных систем}]
 stellar_ids = []
 stellar_to_cluster = {}
 cluster_stellar_ids = {cluster_id: [] for cluster_id in cluster_ids}
@@ -1010,13 +970,9 @@ for cluster_id in cluster_ids:
     cluster_stellar_ids[cluster_id].append(stellar_id)
 \end{lstlisting}
 
-\begin{center}
-Листинг 11 --- Вставка звёздных систем
-\end{center}
-
 На четвёртом уровне создаются планетарные системы. Для каждого звёздного скопления создаётся минимум одна планетарная система, связанная с одной из звёздных систем этого скопления. Это гарантирует логичность и корректность распределения данных. %Затем оставшиеся планетарные системы распределяются случайно между уже существующими звёздными системами.
 
-\begin{lstlisting}
+\begin{lstlisting}[caption={Вставка планетарных систем}]
 plan_system_ids = []
 plan_system_to_cluster = {}
 cluster_plan_system_ids = {cluster_id: [] for cluster_id in cluster_ids}
@@ -1046,13 +1002,9 @@ for cluster_id in cluster_ids:
     cluster_plan_system_ids[cluster_id].append(system_id)
 \end{lstlisting}
 
-\begin{center}
-Листинг 12 --- Вставка планетарных систем
-\end{center}
-
 На пятом уровне заполняются таблицы звёзд и экзопланет. Они находятся на одном уровне иерархии, так как обе таблицы ссылаются на планетарную систему. Для звёзд сначала обеспечивается выполнение требования о наличии минимум десяти звёзд в каждом звёздном скоплении. Для этого звёзды создаются через планетарные системы, принадлежащие соответствующему скоплению.
 
-\begin{lstlisting}
+\begin{lstlisting}[caption={Создание минимум десяти звёзд на скопление}]
 for cluster_id in cluster_ids:
     for _ in range(10):
         star_id = make_id("STAR", star_counter, 6)
@@ -1064,13 +1016,9 @@ for cluster_id in cluster_ids:
         star_ids.append(star_id)
 \end{lstlisting}
 
-\begin{center}
-Листинг 13 --- Создание минимум десяти звёзд на скопление
-\end{center}
-
 Параметры звезды зависят от её спектрального класса. Для каждого класса задаются собственные диапазоны массы, радиуса и температуры. %Это позволяет получать более правдоподобные данные, чем при полностью равномерной генерации всех физических характеристик.
 
-\begin{lstlisting}
+\begin{lstlisting}[caption={Генерация параметров звезды (полный код см. в разделе \hyperref[b][Приложение Б]).}]
 def generate_star_params():
     star_class = random.choice(star_classes)
 
@@ -1086,13 +1034,9 @@ def generate_star_params():
     return star_class, mass, radius, temp
 \end{lstlisting}
 
-\begin{center}
-Листинг 14 --- Генерация параметров звезды (полный код см. в разделе \hyperref[b][Приложение Б]).
-\end{center}
-
 Экзопланеты также генерируются с учётом типа. Для газовых гигантов, нептуновых планет, суперземель и планет земного типа используются разные диапазоны массы и радиуса. Дата последнего наблюдения генерируется так, чтобы она была не раньше даты открытия.
 
-\begin{lstlisting}
+\begin{lstlisting}[caption={Вставка экзопланеты}]
 discov_date = random_date(date(1992, 1, 1), TODAY)
 last_obs_date = random_date(discov_date, TODAY)
 
@@ -1114,13 +1058,9 @@ cur.execute("""
 ))
 \end{lstlisting}
 
-\begin{center}
-Листинг 15 --- Вставка экзопланеты
-\end{center}
-
 На шестом уровне создаются наблюдения. Таблица наблюдений заполняется последней, так как каждая её запись содержит внешние ключи на экзопланету, телескоп и наблюдателя. Для каждой экзопланеты создаётся случайное количество наблюдений от 1 до 7. Чтобы не нарушить ограничение уникальности события наблюдения, комбинация экзопланеты, телескопа, наблюдателя и даты сохраняется в множестве \textit{used\_observations}.
 
-\begin{lstlisting}
+\begin{lstlisting}[caption={Проверка уникальности наблюдения}]
 unique_key = (exo_id, tele_id, observer_id, obs_date)
 
 attempts = 0
@@ -1133,13 +1073,9 @@ while unique_key in used_observations and attempts < 20:
     attempts += 1
 \end{lstlisting}
 
-\begin{center}
-Листинг 16 --- Проверка уникальности наблюдения
-\end{center}
-
 После создания наблюдений выполняется обновление статистических полей. Для каждого телескопа пересчитывается количество открытых планет, а для каждого наблюдателя --- количество открытий. Эти значения накапливаются во время генерации наблюдений и затем записываются в соответствующие таблицы с помощью операторов \textit{UPDATE}.
 
-\begin{lstlisting}
+\begin{lstlisting}[caption={Обновление статистики телескопов и наблюдателей}]
 for tele_id, count in telescope_discovs.items():
     cur.execute("""
         UPDATE telescope
@@ -1160,10 +1096,6 @@ for observer_id, count in observer_discovs.items():
         observer_id
     ))
 \end{lstlisting}
-
-\begin{center}
-Листинг 17 --- Обновление статистики телескопов и наблюдателей
-\end{center}
 
 Таким образом, порядок заполнения базы данных соответствует следующей иерархии:
 
@@ -1247,13 +1179,13 @@ GROUP BY
 ORDER BY t.tele_id;
 \end{lstlisting}
 
-Фрагмент результата выполнения запроса:
+Фрагмент результата выполнения первого запроса изображён на рис. \ref{q1r}:
 
 \begin{figure}[H]
-		\centering
-		\includegraphics[width=0.85\linewidth]{images/queries/q1r}
-		\caption{Фрагмент результата выполнения первого запроса.}
-		\label{q1r}
+	\centering
+	\includegraphics[width=0.85\linewidth]{images/queries/q1r.png}
+	\caption{Фрагмент результата выполнения первого запроса.}
+	\label{q1r}
 \end{figure}
 
 Время выполнения запроса: 24.734 мс.
@@ -1290,140 +1222,219 @@ WHERE o.observer_id = 'Observer_000001'
 GROUP BY o.observer_id, t.tele_type;
 \end{lstlisting}
 
-Фрагмент результата приведён в листинге \ref{lst:q2r}.
+Результат выполнения второго запроса приведён на рис. \ref{q2r}.
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.85\linewidth]{images/queries/q2r.png}
+	\caption{Фрагмент результата выполнения второго запроса.}
+	\label{q2r}
+\end{figure}
 
-\begin{lstlisting}[language=SQL, caption={Текст запроса №1}, label={lst:q2r}]
-   observer_id   | tele_type | stars_count
------------------+-----------+-------------
- Observer_000001 | ground    |          15
-(1 row)
-\end{lstlisting}
 
 Время выполнения запроса: 150.509 мс.
 
 \subsubsection{Запрос 3}
 
-Запрос:
+Запрос: Для каждого класса звезды посчитать число звёзд и число наблюдений, построить 2D-гистограмму.
 
-Были выбраны следующие поля для поиска:
+Данный запрос выполняется по всем классам звёзд, поэтому дополнительные поля для поиска не выбирались.
 
-\begin{itemize}
-  \item A
-  \item B
-  \item C
-\end{itemize}
+Текст запроса на SQL:
 
-Текст запроса приведён в листинге \ref{lst:q3t}.
+% \begin{lstlisting}[language=SQL, caption={Текст запроса №3}, label={lst:q3t}]
+% 
+% \end{lstlisting}
 
-\begin{lstlisting}[language=SQL, caption={Текст запроса №1}, label={lst:q3t}]
+Фрагмент результата выполнения запроса:
 
-\end{lstlisting}
+% \begin{lstlisting}[caption={Фрагмент результата выполнения третьего запроса}, label={lst:q3r}]
+% 
+% \end{lstlisting}
 
-Фрагмент результата приведён в листинге \ref{lst:q3r}.
+Гистограмма результата:
 
-\begin{lstlisting}[language=SQL, caption={Текст запроса №1}, label={lst:q3r}]
+% \begin{figure}[H]
+% 	\centering
+% 	\includegraphics[width=0.85\linewidth]{images/queries/q3h.png}
+% 	\caption{Гистограмма результата выполнения третьего запроса.}
+% 	\label{q3h}
+% \end{figure}
 
-\end{lstlisting}
-
-Время выполнения запроса:
+Время выполнения запроса: 724.394 мс.
 
 \subsubsection{Запрос 4.1}
 
-Запрос:
+Запрос: Найти страны, из которых наблюдалось максимальное число экзопланет.
 
-Были выбраны следующие поля для поиска:
+Данный запрос выполняется по всем странам наблюдателей, поэтому дополнительные поля для поиска не выбирались.
 
-\begin{itemize}
-  \item A
-  \item B
-  \item C
-\end{itemize}
+Текст запроса на SQL:
 
-Текст запроса приведён в листинге \ref{lst:q41t}.
+% \begin{lstlisting}[language=SQL, caption={Текст запроса №4.1}, label={lst:q41t}]
+% 
+% \end{lstlisting}
 
-\begin{lstlisting}[language=SQL, caption={Текст запроса №1}, label={lst:q41t}]
+Фрагмент результата выполнения запроса:
 
-\end{lstlisting}
+% \begin{lstlisting}[caption={Фрагмент результата выполнения запроса 4.1}, label={lst:q41r}]
+% 
+% \end{lstlisting}
 
-Фрагмент результата приведён в листинге \ref{lst:q41r}.
-
-\begin{lstlisting}[language=SQL, caption={Текст запроса №1}, label={lst:q41r}]
-
-\end{lstlisting}
-
-Время выполнения запроса:
+Время выполнения запроса: 797.070 мс.
 
 \subsubsection{Запрос 4.2}
 
-Запрос:
+Запрос: Найти страны, из которых наблюдалось минимальное число экзопланет.
 
-Были выбраны следующие поля для поиска:
+Данный запрос выполняется по всем странам наблюдателей, поэтому дополнительные поля для поиска не выбирались.
 
-\begin{itemize}
-  \item A
-  \item B
-  \item C
-\end{itemize}
+Текст запроса на SQL:
+
+% \begin{lstlisting}[language=SQL, caption={Текст запроса №4.2}, label={lst:q42t}]
+% 
+% \end{lstlisting}
+
+Фрагмент результата выполнения запроса:
+
+% \begin{lstlisting}[caption={Фрагмент результата выполнения запроса 4.2}, label={lst:q42r}]
+% 
+% \end{lstlisting}
+
+Время выполнения запроса: 446.087 мс.
 
 \subsubsection{Запрос 5}
 
-Запрос:
+Запрос: Посчитать число экзопланет с равным числом наблюдений, построить 2D-гистограмму.
 
-Были выбраны следующие поля для поиска:
+Данный запрос выполняется по всем экзопланетам, поэтому дополнительные поля для поиска не выбирались.
 
-\begin{itemize}
-  \item A
-  \item B
-  \item C
-\end{itemize}
+Текст запроса на SQL:
+
+% \begin{lstlisting}[language=SQL, caption={Текст запроса №5}, label={lst:q5t}]
+% 
+% \end{lstlisting}
+
+Фрагмент результата выполнения запроса:
+
+% \begin{lstlisting}[caption={Фрагмент результата выполнения пятого запроса}, label={lst:q5r}]
+% 
+% \end{lstlisting}
+
+Гистограмма результата:
+
+% \begin{figure}[H]
+% 	\centering
+% 	\includegraphics[width=0.85\linewidth]{images/queries/q5h.png}
+% 	\caption{Гистограмма результата выполнения пятого запроса.}
+% 	\label{q5h}
+% \end{figure}
+
+Время выполнения запроса: 76.249 мс.
 
 \subsubsection{Запрос 6}
 
-Запрос:
+Запрос: Найти галактику, в которой не наблюдалось ни одной звезды выбранным типом телескопа.
 
-Были выбраны следующие поля для поиска:
+Было выбрано следующее поле для поиска:
 
 \begin{itemize}
-  \item A
-  \item B
-  \item C
+  \item A --- ground.
 \end{itemize}
+
+Текст запроса на SQL:
+
+% \begin{lstlisting}[language=SQL, caption={Текст запроса №6}, label={lst:q6t}]
+% 
+% \end{lstlisting}
+
+Фрагмент результата выполнения запроса:
+
+% \begin{lstlisting}[caption={Фрагмент результата выполнения шестого запроса}, label={lst:q6r}]
+% 
+% \end{lstlisting}
+
+Время выполнения запроса: 452.434 мс.
 
 \subsubsection{Запрос 7}
 
-Запрос:
+Запрос: Найти наблюдателей, которые наблюдали больше экзопланет, чем наблюдатель A.
 
-Были выбраны следующие поля для поиска:
+Было выбрано следующее поле для поиска:
 
 \begin{itemize}
-  \item A
-  \item B
-  \item C
+  \item A --- Observer\_000001.
 \end{itemize}
+
+Текст запроса на SQL:
+
+% \begin{lstlisting}[language=SQL, caption={Текст запроса №7}, label={lst:q7t}]
+% 
+% \end{lstlisting}
+
+Фрагмент результата выполнения запроса:
+
+% \begin{lstlisting}[caption={Фрагмент результата выполнения седьмого запроса}, label={lst:q7r}]
+% 
+% \end{lstlisting}
+
+Время выполнения запроса: 128.453 мс.
 
 \subsubsection{Запрос 8}
 
-Запрос:
+Запрос: Для каждого телескопа и для каждой страны посчитать число наблюдений, построить 3D-гистограмму.
 
-Были выбраны следующие поля для поиска:
+Данный запрос выполняется по всем телескопам и странам, поэтому дополнительные поля для поиска не выбирались.
 
-\begin{itemize}
-  \item A
-  \item B
-  \item C
-\end{itemize}
+Текст запроса на SQL:
+
+% \begin{lstlisting}[language=SQL, caption={Текст запроса №8}, label={lst:q8t}]
+% 
+% \end{lstlisting}
+
+Фрагмент результата выполнения запроса:
+
+% \begin{lstlisting}[caption={Фрагмент результата выполнения восьмого запроса}, label={lst:q8r}]
+% 
+% \end{lstlisting}
+
+Гистограмма полного результата:
+
+% \begin{figure}[H]
+% 	\centering
+% 	\includegraphics[width=0.85\linewidth]{images/queries/q8h.png}
+% 	\caption{Гистограмма результата выполнения восьмого запроса.}
+% 	\label{q8h}
+% \end{figure}
+
+Гистограмма результата для топ-20:
+
+Время выполнения запроса: 799.293 мс.
 
 \subsubsection{Запрос 9}
 
-Запрос:
+Запрос: Для всех наблюдений через телескоп A, в которых наблюдается объект B, поменять наблюдения на наблюдения для наблюдателя C.
 
 Были выбраны следующие поля для поиска:
 
 \begin{itemize}
-  \item A
-  \item B
-  \item C
+  \item A --- [указать идентификатор телескопа];
+  \item B --- [указать идентификатор наблюдаемого объекта];
+  \item C --- [указать идентификатор наблюдателя].
 \end{itemize}
+
+Текст запроса на SQL:
+
+% \begin{lstlisting}[language=SQL, caption={Текст запроса №9}, label={lst:q9t}]
+% 
+% \end{lstlisting}
+
+Фрагмент результата выполнения запроса:
+
+% \begin{lstlisting}[caption={Фрагмент результата выполнения девятого запроса}, label={lst:q9r}]
+% 
+% \end{lstlisting}
+
+Время выполнения запроса: 
 
 
 \newpage

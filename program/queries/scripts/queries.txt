@@ -1,0 +1,245 @@
+-- Query 1.
+-- Find all telescopes that observed terrestrial exoplanets in galaxy GAL_0001
+-- around stars of class G.
+
+SELECT
+    t.tele_id,
+    t.tele_type,
+    t.aper,
+    t.com_year,
+    t.oper,
+    t.discov_plan,
+    COUNT(DISTINCT o.observation_id) AS observations_count,
+    COUNT(DISTINCT e.exo_id) AS exoplanets_count
+FROM telescope t
+JOIN observation o
+    ON o.tele_id = t.tele_id
+JOIN exoplanet e
+    ON e.exo_id = o.exo_id
+JOIN plan_system ps
+    ON ps.system_id = e.sys_id
+JOIN star s
+    ON s.sys_id = ps.system_id
+JOIN stellar_system ss
+    ON ss.stellar_id = ps.stell_sys_id
+JOIN cluster c
+    ON c.cluster_id = ss.cluster_id
+JOIN galaxy g
+    ON g.galaxy_id = c.galaxy_id
+WHERE e.exo_type = 'terrestrial'
+  AND g.galaxy_id = 'GAL_0001'
+  AND s.class = 'G'
+GROUP BY
+    t.tele_id,
+    t.tele_type,
+    t.aper,
+    t.com_year,
+    t.oper,
+    t.discov_plan
+ORDER BY t.tele_id;
+
+
+-- Query 2.
+-- For observer Observer_000001, count stars observed through ground telescopes.
+
+SELECT
+    o.observer_id,
+    t.tele_type,
+    COUNT(DISTINCT s.star_id) AS stars_count
+FROM observation o
+JOIN telescope t
+    ON t.tele_id = o.tele_id
+JOIN exoplanet e
+    ON e.exo_id = o.exo_id
+JOIN plan_system ps
+    ON ps.system_id = e.sys_id
+JOIN star s
+    ON s.sys_id = ps.system_id
+WHERE o.observer_id = 'Observer_000001'
+  AND t.tele_type = 'ground'
+GROUP BY o.observer_id, t.tele_type;
+
+
+-- Query 3.
+-- For each star class, count stars and observations.
+
+SELECT
+    s.class AS star_class,
+    COUNT(DISTINCT s.star_id) AS stars_count,
+    COUNT(DISTINCT o.observation_id) AS observations_count
+FROM star s
+LEFT JOIN plan_system ps
+    ON ps.system_id = s.sys_id
+LEFT JOIN exoplanet e
+    ON e.sys_id = ps.system_id
+LEFT JOIN observation o
+    ON o.exo_id = e.exo_id
+GROUP BY s.class
+ORDER BY s.class;
+
+
+-- Query 4.1.
+-- Find countries with the maximum number of distinct observed exoplanets.
+
+SELECT
+    obs.country,
+    COUNT(DISTINCT o.exo_id) AS exoplanets_count
+FROM observer obs
+JOIN observation o
+    ON o.observer_id = obs.observer_id
+GROUP BY obs.country
+ORDER BY exoplanets_count DESC
+FETCH FIRST 1 ROW WITH TIES;
+
+
+-- Query 4.2.
+-- Find countries with the minimum number of distinct observed exoplanets.
+
+SELECT
+    obs.country,
+    COUNT(DISTINCT o.exo_id) AS exoplanets_count
+FROM observer obs
+JOIN observation o
+    ON o.observer_id = obs.observer_id
+GROUP BY obs.country
+ORDER BY exoplanets_count ASC
+FETCH FIRST 1 ROW WITH TIES;
+
+
+-- Query 5.
+-- Count how many exoplanets have the same number of observations.
+-- A CTE is used here because the query has two aggregation levels:
+-- first observations per exoplanet, then exoplanets per observation count.
+
+WITH exoplanet_observations AS (
+    SELECT
+        e.exo_id,
+        COUNT(o.observation_id) AS observations_count
+    FROM exoplanet e
+    LEFT JOIN observation o
+        ON o.exo_id = e.exo_id
+    GROUP BY e.exo_id
+)
+SELECT
+    observations_count,
+    COUNT(*) AS exoplanets_count
+FROM exoplanet_observations
+GROUP BY observations_count
+ORDER BY observations_count;
+
+
+-- Query 6.
+-- Find galaxies where no stars were observed through ground telescopes.
+
+SELECT
+    g.galaxy_id,
+    g.conf_plan,
+    g.hab_plan,
+    g.dist,
+    'ground'::tele_type_enum AS tele_type,
+    COUNT(DISTINCT CASE WHEN t.tele_id IS NOT NULL THEN s.star_id END)
+        AS observed_stars_count
+FROM galaxy g
+LEFT JOIN cluster c
+    ON c.galaxy_id = g.galaxy_id
+LEFT JOIN stellar_system ss
+    ON ss.cluster_id = c.cluster_id
+LEFT JOIN plan_system ps
+    ON ps.stell_sys_id = ss.stellar_id
+LEFT JOIN star s
+    ON s.sys_id = ps.system_id
+LEFT JOIN exoplanet e
+    ON e.sys_id = ps.system_id
+LEFT JOIN observation o
+    ON o.exo_id = e.exo_id
+LEFT JOIN telescope t
+    ON t.tele_id = o.tele_id
+   AND t.tele_type = 'ground'
+GROUP BY
+    g.galaxy_id,
+    g.conf_plan,
+    g.hab_plan,
+    g.dist
+HAVING COUNT(DISTINCT CASE WHEN t.tele_id IS NOT NULL THEN s.star_id END) = 0
+ORDER BY g.galaxy_id;
+
+
+-- Query 7.
+-- Find observers who observed more distinct exoplanets than Observer_000001.
+-- Index for this query:
+
+CREATE INDEX IF NOT EXISTS idx_observation_observer_exo
+    ON observation(observer_id, exo_id);
+
+WITH observer_counts AS MATERIALIZED (
+    SELECT
+        obs.observer_id,
+        obs.country,
+        COUNT(DISTINCT o.exo_id) AS exoplanets_count
+    FROM observer obs
+    LEFT JOIN observation o
+        ON o.observer_id = obs.observer_id
+    GROUP BY obs.observer_id, obs.country
+)
+SELECT
+    oc.observer_id,
+    oc.country,
+    oc.exoplanets_count,
+    target.exoplanets_count AS target_exoplanets_count
+FROM observer_counts oc
+JOIN observer_counts target
+    ON target.observer_id = 'Observer_000001'
+WHERE oc.observer_id <> target.observer_id
+  AND oc.exoplanets_count > target.exoplanets_count
+ORDER BY oc.exoplanets_count DESC, oc.observer_id;
+
+
+-- Query 8.
+-- For each telescope and each country, count observations.
+-- Index for this query:
+
+CREATE INDEX IF NOT EXISTS idx_observation_tele_observer
+    ON observation(tele_id, observer_id);
+
+WITH observed_counts AS MATERIALIZED (
+    SELECT
+        o.tele_id,
+        obs.country,
+        COUNT(*) AS observations_count
+    FROM observation o
+    JOIN observer obs
+        ON obs.observer_id = o.observer_id
+    GROUP BY o.tele_id, obs.country
+)
+SELECT
+    t.tele_id,
+    t.tele_type,
+    t.oper,
+    countries.country,
+    COALESCE(oc.observations_count, 0) AS observations_count
+FROM telescope t
+CROSS JOIN unnest(enum_range(NULL::country_enum)) AS countries(country)
+LEFT JOIN observed_counts oc
+    ON oc.tele_id = t.tele_id
+   AND oc.country = countries.country
+ORDER BY observations_count DESC, t.tele_id, countries.country;
+
+
+-- Query 9.
+-- For all observations through telescope A of exoplanet B, change observer to C.
+-- Replace TELE_00001, EXO_000001, and Observer_000001 with selected values.
+-- NOT EXISTS is used to avoid breaking the UNIQUE constraint on
+-- (exo_id, tele_id, observer_id, obs_date).
+
+UPDATE observation o
+SET observer_id = 'Observer_000001'
+WHERE o.tele_id = 'TELE_00001'
+  AND o.exo_id = 'EXO_000001'
+  AND NOT EXISTS (
+      SELECT 1
+      FROM observation duplicate
+      WHERE duplicate.exo_id = o.exo_id
+        AND duplicate.tele_id = o.tele_id
+        AND duplicate.observer_id = 'Observer_000001'
+        AND duplicate.obs_date = o.obs_date
+  );
