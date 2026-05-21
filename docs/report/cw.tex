@@ -1139,7 +1139,7 @@ for observer_id, count in observer_discovs.items():
   \item C --- G.
 \end{itemize}
 
-Текст запроса на SQL:
+Текст запроса на SQL приведён в листинге \ref{lst:q1t}.
 
 \begin{lstlisting}[language=SQL, caption={Текст запроса №1}, label={lst:q1t}]
 SELECT
@@ -1179,7 +1179,7 @@ GROUP BY
 ORDER BY t.tele_id;
 \end{lstlisting}
 
-Фрагмент результата выполнения первого запроса изображён на рис. \ref{q1r}:
+Фрагмент результата выполнения первого запроса приведён на рис. \ref{q1r}.
 
 \begin{figure}[H]
 	\centering
@@ -1201,9 +1201,9 @@ ORDER BY t.tele_id;
   \item B --- ground.
 \end{itemize}
 
-Текст запроса приведён в листинге \ref{lst:q2t}.
+Текст запроса на SQL приведён в листинге \ref{lst:q2t}.
 
-\begin{lstlisting}[language=SQL, caption={Текст запроса №1}, label={lst:q2t}]
+\begin{lstlisting}[language=SQL, caption={Текст запроса №2}, label={lst:q2t}]
 SELECT
     o.observer_id,
     t.tele_type,
@@ -1222,7 +1222,7 @@ WHERE o.observer_id = 'Observer_000001'
 GROUP BY o.observer_id, t.tele_type;
 \end{lstlisting}
 
-Результат выполнения второго запроса приведён на рис. \ref{q2r}.
+Фрагмент результата выполнения второго запроса приведён на рис. \ref{q2r}.
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.85\linewidth]{images/queries/q2r.png}
@@ -1239,26 +1239,41 @@ GROUP BY o.observer_id, t.tele_type;
 
 Данный запрос выполняется по всем классам звёзд, поэтому дополнительные поля для поиска не выбирались.
 
-Текст запроса на SQL:
+Текст запроса на SQL приведён в листинге \ref{lst:q3t}.
 
-% \begin{lstlisting}[language=SQL, caption={Текст запроса №3}, label={lst:q3t}]
-% 
-% \end{lstlisting}
+\begin{lstlisting}[language=SQL, caption={Текст запроса №3}, label={lst:q3t}]
+SELECT
+    s.class AS star_class,
+    COUNT(DISTINCT s.star_id) AS stars_count,
+    COUNT(DISTINCT o.observation_id) AS observations_count
+FROM star s
+LEFT JOIN plan_system ps
+    ON ps.system_id = s.sys_id
+LEFT JOIN exoplanet e
+    ON e.sys_id = ps.system_id
+LEFT JOIN observation o
+    ON o.exo_id = e.exo_id
+GROUP BY s.class
+ORDER BY s.class;
+\end{lstlisting}
 
-Фрагмент результата выполнения запроса:
+Фрагмент результата выполнения третьего запроса приведён на рис. \ref{q3r}.
 
-% \begin{lstlisting}[caption={Фрагмент результата выполнения третьего запроса}, label={lst:q3r}]
-% 
-% \end{lstlisting}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.85\linewidth]{images/queries/q3r.png}
+	\caption{Фрагмент результата выполнения третьего запроса.}
+	\label{q3r}
+\end{figure}
 
 Гистограмма результата:
 
-% \begin{figure}[H]
-% 	\centering
-% 	\includegraphics[width=0.85\linewidth]{images/queries/q3h.png}
-% 	\caption{Гистограмма результата выполнения третьего запроса.}
-% 	\label{q3h}
-% \end{figure}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.85\linewidth]{images/queries/q3h.png}
+	\caption{Гистограмма результата выполнения третьего запроса.}
+	\label{q3h}
+\end{figure}
 
 Время выполнения запроса: 724.394 мс.
 
@@ -1268,17 +1283,28 @@ GROUP BY o.observer_id, t.tele_type;
 
 Данный запрос выполняется по всем странам наблюдателей, поэтому дополнительные поля для поиска не выбирались.
 
-Текст запроса на SQL:
+Текст запроса на SQL приведён в листинге \ref{lst:q41t}.
 
-% \begin{lstlisting}[language=SQL, caption={Текст запроса №4.1}, label={lst:q41t}]
-% 
-% \end{lstlisting}
+\begin{lstlisting}[language=SQL, caption={Текст запроса №4.1}, label={lst:q41t}]
+SELECT
+    obs.country,
+    COUNT(DISTINCT o.exo_id) AS exoplanets_count
+FROM observer obs
+JOIN observation o
+    ON o.observer_id = obs.observer_id
+GROUP BY obs.country
+ORDER BY exoplanets_count DESC
+FETCH FIRST 1 ROW WITH TIES;
+\end{lstlisting}
 
-Фрагмент результата выполнения запроса:
+Фрагмент результата выполнения запроса 4.1 приведён на рис. \ref{q41r}.
 
-% \begin{lstlisting}[caption={Фрагмент результата выполнения запроса 4.1}, label={lst:q41r}]
-% 
-% \end{lstlisting}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.85\linewidth]{images/queries/q41r.png}
+	\caption{Фрагмент результата выполнения запроса 4.1.}
+	\label{q41r}
+\end{figure}
 
 Время выполнения запроса: 797.070 мс.
 
@@ -1288,17 +1314,28 @@ GROUP BY o.observer_id, t.tele_type;
 
 Данный запрос выполняется по всем странам наблюдателей, поэтому дополнительные поля для поиска не выбирались.
 
-Текст запроса на SQL:
+Текст запроса на SQL приведён в листинге \ref{lst:q42t}.
 
-% \begin{lstlisting}[language=SQL, caption={Текст запроса №4.2}, label={lst:q42t}]
-% 
-% \end{lstlisting}
+\begin{lstlisting}[language=SQL, caption={Текст запроса №4.2}, label={lst:q42t}]
+SELECT
+    obs.country,
+    COUNT(DISTINCT o.exo_id) AS exoplanets_count
+FROM observer obs
+JOIN observation o
+    ON o.observer_id = obs.observer_id
+GROUP BY obs.country
+ORDER BY exoplanets_count ASC
+FETCH FIRST 1 ROW WITH TIES;
+\end{lstlisting}
 
-Фрагмент результата выполнения запроса:
+Фрагмент результата выполнения запроса 4.2 приведён на рис. \ref{q42r}.
 
-% \begin{lstlisting}[caption={Фрагмент результата выполнения запроса 4.2}, label={lst:q42r}]
-% 
-% \end{lstlisting}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.85\linewidth]{images/queries/q42r.png}
+	\caption{Фрагмент результата выполнения запроса 4.2.}
+	\label{q42r}
+\end{figure}
 
 Время выполнения запроса: 446.087 мс.
 
@@ -1308,26 +1345,43 @@ GROUP BY o.observer_id, t.tele_type;
 
 Данный запрос выполняется по всем экзопланетам, поэтому дополнительные поля для поиска не выбирались.
 
-Текст запроса на SQL:
+Текст запроса на SQL приведён в листинге \ref{lst:q5t}.
 
-% \begin{lstlisting}[language=SQL, caption={Текст запроса №5}, label={lst:q5t}]
-% 
-% \end{lstlisting}
+\begin{lstlisting}[language=SQL, caption={Текст запроса №5}, label={lst:q5t}]
+WITH exoplanet_observations AS (
+    SELECT
+        e.exo_id,
+        COUNT(o.observation_id) AS observations_count
+    FROM exoplanet e
+    LEFT JOIN observation o
+        ON o.exo_id = e.exo_id
+    GROUP BY e.exo_id
+)
+SELECT
+    observations_count,
+    COUNT(*) AS exoplanets_count
+FROM exoplanet_observations
+GROUP BY observations_count
+ORDER BY observations_count;
+\end{lstlisting}
 
-Фрагмент результата выполнения запроса:
+Фрагмент результата выполнения пятого запроса приведён на рис. \ref{q5r}.
 
-% \begin{lstlisting}[caption={Фрагмент результата выполнения пятого запроса}, label={lst:q5r}]
-% 
-% \end{lstlisting}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.85\linewidth]{images/queries/q5r.png}
+	\caption{Фрагмент результата выполнения пятого запроса.}
+	\label{q5r}
+\end{figure}
 
 Гистограмма результата:
 
-% \begin{figure}[H]
-% 	\centering
-% 	\includegraphics[width=0.85\linewidth]{images/queries/q5h.png}
-% 	\caption{Гистограмма результата выполнения пятого запроса.}
-% 	\label{q5h}
-% \end{figure}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.85\linewidth]{images/queries/q5h.png}
+	\caption{Гистограмма результата выполнения пятого запроса.}
+	\label{q5h}
+\end{figure}
 
 Время выполнения запроса: 76.249 мс.
 
@@ -1341,17 +1395,50 @@ GROUP BY o.observer_id, t.tele_type;
   \item A --- ground.
 \end{itemize}
 
-Текст запроса на SQL:
+Текст запроса на SQL приведён в листинге \ref{lst:q6t}.
 
-% \begin{lstlisting}[language=SQL, caption={Текст запроса №6}, label={lst:q6t}]
-% 
-% \end{lstlisting}
+\begin{lstlisting}[language=SQL, caption={Текст запроса №6}, label={lst:q6t}]
+SELECT
+    g.galaxy_id,
+    g.conf_plan,
+    g.hab_plan,
+    g.dist,
+    'ground'::tele_type_enum AS tele_type,
+    COUNT(DISTINCT CASE WHEN t.tele_id IS NOT NULL THEN s.star_id END)
+        AS observed_stars_count
+FROM galaxy g
+LEFT JOIN cluster c
+    ON c.galaxy_id = g.galaxy_id
+LEFT JOIN stellar_system ss
+    ON ss.cluster_id = c.cluster_id
+LEFT JOIN plan_system ps
+    ON ps.stell_sys_id = ss.stellar_id
+LEFT JOIN star s
+    ON s.sys_id = ps.system_id
+LEFT JOIN exoplanet e
+    ON e.sys_id = ps.system_id
+LEFT JOIN observation o
+    ON o.exo_id = e.exo_id
+LEFT JOIN telescope t
+    ON t.tele_id = o.tele_id
+   AND t.tele_type = 'ground'
+GROUP BY
+    g.galaxy_id,
+    g.conf_plan,
+    g.hab_plan,
+    g.dist
+HAVING COUNT(DISTINCT CASE WHEN t.tele_id IS NOT NULL THEN s.star_id END) = 0
+ORDER BY g.galaxy_id;
+\end{lstlisting}
 
-Фрагмент результата выполнения запроса:
+Фрагмент результата выполнения шестого запроса приведён на рис. \ref{q6r}.
 
-% \begin{lstlisting}[caption={Фрагмент результата выполнения шестого запроса}, label={lst:q6r}]
-% 
-% \end{lstlisting}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.85\linewidth]{images/queries/q6r.png}
+	\caption{Фрагмент результата выполнения шестого запроса.}
+	\label{q6r}
+\end{figure}
 
 Время выполнения запроса: 452.434 мс.
 
@@ -1365,17 +1452,40 @@ GROUP BY o.observer_id, t.tele_type;
   \item A --- Observer\_000001.
 \end{itemize}
 
-Текст запроса на SQL:
+Текст запроса на SQL приведён в листинге \ref{lst:q7t}.
 
-% \begin{lstlisting}[language=SQL, caption={Текст запроса №7}, label={lst:q7t}]
-% 
-% \end{lstlisting}
+\begin{lstlisting}[language=SQL, caption={Текст запроса №7}, label={lst:q7t}]
+WITH observer_counts AS MATERIALIZED (
+    SELECT
+        obs.observer_id,
+        obs.country,
+        COUNT(DISTINCT o.exo_id) AS exoplanets_count
+    FROM observer obs
+    LEFT JOIN observation o
+        ON o.observer_id = obs.observer_id
+    GROUP BY obs.observer_id, obs.country
+)
+SELECT
+    oc.observer_id,
+    oc.country,
+    oc.exoplanets_count,
+    target.exoplanets_count AS target_exoplanets_count
+FROM observer_counts oc
+JOIN observer_counts target
+    ON target.observer_id = 'Observer_000001'
+WHERE oc.observer_id <> target.observer_id
+  AND oc.exoplanets_count > target.exoplanets_count
+ORDER BY oc.exoplanets_count DESC, oc.observer_id;
+\end{lstlisting}
 
-Фрагмент результата выполнения запроса:
+Фрагмент результата выполнения седьмого запроса приведён на рис. \ref{q7r}.
 
-% \begin{lstlisting}[caption={Фрагмент результата выполнения седьмого запроса}, label={lst:q7r}]
-% 
-% \end{lstlisting}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.85\linewidth]{images/queries/q7r.png}
+	\caption{Фрагмент результата выполнения седьмого запроса.}
+	\label{q7r}
+\end{figure}
 
 Время выполнения запроса: 128.453 мс.
 
@@ -1385,26 +1495,50 @@ GROUP BY o.observer_id, t.tele_type;
 
 Данный запрос выполняется по всем телескопам и странам, поэтому дополнительные поля для поиска не выбирались.
 
-Текст запроса на SQL:
+Текст запроса на SQL приведён в листинге \ref{lst:q8t}.
 
-% \begin{lstlisting}[language=SQL, caption={Текст запроса №8}, label={lst:q8t}]
-% 
-% \end{lstlisting}
+\begin{lstlisting}[language=SQL, caption={Текст запроса №8}, label={lst:q8t}]
+WITH observed_counts AS MATERIALIZED (
+    SELECT
+        o.tele_id,
+        obs.country,
+        COUNT(*) AS observations_count
+    FROM observation o
+    JOIN observer obs
+        ON obs.observer_id = o.observer_id
+    GROUP BY o.tele_id, obs.country
+)
+SELECT
+    t.tele_id,
+    t.tele_type,
+    t.oper,
+    countries.country,
+    COALESCE(oc.observations_count, 0) AS observations_count
+FROM telescope t
+CROSS JOIN unnest(enum_range(NULL::country_enum)) AS countries(country)
+LEFT JOIN observed_counts oc
+    ON oc.tele_id = t.tele_id
+   AND oc.country = countries.country
+ORDER BY observations_count DESC, t.tele_id, countries.country;
+\end{lstlisting}
 
-Фрагмент результата выполнения запроса:
+Фрагмент результата выполнения восьмого запроса приведён на рис. \ref{q8r}.
 
-% \begin{lstlisting}[caption={Фрагмент результата выполнения восьмого запроса}, label={lst:q8r}]
-% 
-% \end{lstlisting}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.85\linewidth]{images/queries/q8r.png}
+	\caption{Фрагмент результата выполнения восьмого запроса.}
+	\label{q8r}
+\end{figure}
 
 Гистограмма полного результата:
 
-% \begin{figure}[H]
-% 	\centering
-% 	\includegraphics[width=0.85\linewidth]{images/queries/q8h.png}
-% 	\caption{Гистограмма результата выполнения восьмого запроса.}
-% 	\label{q8h}
-% \end{figure}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.85\linewidth]{images/queries/q8h.png}
+	\caption{Гистограмма результата выполнения восьмого запроса.}
+	\label{q8h}
+\end{figure}
 
 Гистограмма результата для топ-20:
 
