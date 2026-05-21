@@ -1171,29 +1171,24 @@ ORDER BY t.tele_id;
 
 Реляционная формула запроса:
 
-\[
+[
 \begin{aligned}
-&\tau_{\mathrm{tele\_id}}\Big(\\
-&\quad \gamma_{\substack{
-    \mathrm{tele\_id},\mathrm{tele\_type},\mathrm{aper},\mathrm{com\_year},\mathrm{oper},\mathrm{discov\_plan};\\
-    \operatorname{COUNTD}(\mathrm{observation\_id}),\operatorname{COUNTD}(\mathrm{exo\_id})
-}}\Big(\\
-&\quad\quad \sigma_{\substack{
-    \mathrm{exo\_type}=\mathrm{terrestrial}\ \land\\
-    \mathrm{galaxy\_id}=\mathrm{GAL\_0001}\ \land\\
-    \mathrm{class}=\mathrm{G}
-}}\Big(\\
-&\quad\quad\quad \mathrm{telescope}\\
-&\quad\quad\quad \bowtie_{\mathrm{tele\_id}}\mathrm{observation}\\
-&\quad\quad\quad \bowtie_{\mathrm{exo\_id}}\mathrm{exoplanet}\\
-&\quad\quad\quad \bowtie_{\mathrm{sys\_id}}\mathrm{plan\_system}\\
-&\quad\quad\quad \bowtie_{\mathrm{sys\_id}}\mathrm{star}\\
-&\quad\quad\quad \bowtie_{\mathrm{stellar\_id}}\mathrm{stellar\_system}\\
-&\quad\quad\quad \bowtie_{\mathrm{cluster\_id}}\mathrm{cluster}\\
-&\quad\quad\quad \bowtie_{\mathrm{galaxy\_id}}\mathrm{galaxy}
-\Big)\Big)\Big).
+&\tau_{\mathrm{tele_id}}\Big(\
+&\quad \gamma_{\mathrm{tele_id, tele_type, aper, com_year, oper, discov_plan; COUNTD(observation_id), COUNTD(exo_id)}}\Big(\
+&\quad\quad \sigma_{\mathrm{exo_type = terrestrial \land galaxy_id = GAL_0001 \land class = G}}\Big(\
+&\quad\quad\quad \mathrm{telescope}\
+&\quad\quad\quad \bowtie_{\mathrm{tele_id}} \mathrm{observation}\
+&\quad\quad\quad \bowtie_{\mathrm{exo_id}} \mathrm{exoplanet}\
+&\quad\quad\quad \bowtie_{\mathrm{sys_id}} \mathrm{plan_system}\
+&\quad\quad\quad \bowtie_{\mathrm{sys_id}} \mathrm{star}\
+&\quad\quad\quad \bowtie_{\mathrm{stellar_id}} \mathrm{stellar_system}\
+&\quad\quad\quad \bowtie_{\mathrm{cluster_id}} \mathrm{cluster}\
+&\quad\quad\quad \bowtie_{\mathrm{galaxy_id}} \mathrm{galaxy}\
+&\quad\quad\Big)\
+&\quad\Big)\
+&\Big)
 \end{aligned}
-\]
+]
 
 Последовательность выполнения запроса приведена в табл. \ref{tab:q1plan}.
 
@@ -1265,22 +1260,18 @@ GROUP BY o.observer_id, t.tele_type;
 
 \[
 \begin{aligned}
-&\gamma_{\substack{
-    \mathrm{observer\_id},\mathrm{tele\_type};\\
-    \operatorname{COUNTD}(\mathrm{star\_id})
-}}\Big(\\
-&\quad \sigma_{\substack{
-    \mathrm{observer\_id}=\mathrm{Observer\_000001}\ \land\\
-    \mathrm{tele\_type}=\mathrm{ground}
-}}\Big(\\
-&\quad\quad \mathrm{observation}\\
-&\quad\quad \bowtie_{\mathrm{tele\_id}}\mathrm{telescope}\\
-&\quad\quad \bowtie_{\mathrm{exo\_id}}\mathrm{exoplanet}\\
-&\quad\quad \bowtie_{\mathrm{sys\_id}}\mathrm{plan\_system}\\
-&\quad\quad \bowtie_{\mathrm{sys\_id}}\mathrm{star}
-\Big)\Big).
+&\gamma_{\mathrm{observer_id, tele_type; COUNTD(star_id)}}\Big(\
+&\quad \sigma_{\mathrm{observer_id = Observer_000001 \land tele_type = ground}}\Big(\
+&\quad\quad \mathrm{observation}\
+&\quad\quad \bowtie_{\mathrm{tele_id}} \mathrm{telescope}\
+&\quad\quad \bowtie_{\mathrm{exo_id}} \mathrm{exoplanet}\
+&\quad\quad \bowtie_{\mathrm{sys_id}} \mathrm{plan_system}\
+&\quad\quad \bowtie_{\mathrm{sys_id}} \mathrm{star}\
+&\quad\quad \Big)\
+&\Big)
 \end{aligned}
 \]
+
 
 Последовательность выполнения запроса приведена в табл. \ref{tab:q2plan}.
 
@@ -1343,18 +1334,17 @@ ORDER BY s.class;
 
 \[
 \begin{aligned}
-&\tau_{\mathrm{class}}\Big(\\
-&\quad \gamma_{\substack{
-    \mathrm{class};\\
-    \operatorname{COUNTD}(\mathrm{star\_id}),\operatorname{COUNTD}(\mathrm{observation\_id})
-}}\Big(\\
-&\quad\quad \mathrm{star}\\
-&\quad\quad \mathbin{\operatorname{LEFTJOIN}}_{\mathrm{sys\_id}}\mathrm{plan\_system}\\
-&\quad\quad \mathbin{\operatorname{LEFTJOIN}}_{\mathrm{system\_id}=\mathrm{sys\_id}}\mathrm{exoplanet}\\
-&\quad\quad \mathbin{\operatorname{LEFTJOIN}}_{\mathrm{exo\_id}}\mathrm{observation}
-\Big)\Big).
+&\tau_{\mathrm{class}}\Big(\
+&\quad \gamma_{\mathrm{class; COUNTD(star_id), COUNTD(observation_id)}}\Big(\
+&\quad\quad \mathrm{star}\
+&\quad\quad \mathbin{\operatorname{LEFTJOIN}}*{\mathrm{sys_id}} \mathrm{plan_system}\
+&\quad\quad \mathbin{\operatorname{LEFTJOIN}}*{\mathrm{system_id = sys_id}} \mathrm{exoplanet}\
+&\quad\quad \mathbin{\operatorname{LEFTJOIN}}_{\mathrm{exo_id}} \mathrm{observation}\
+&\quad\quad \Big)\
+&\Big)
 \end{aligned}
 \]
+
 
 Последовательность выполнения запроса приведена в табл. \ref{tab:q3plan}.
 
@@ -1423,17 +1413,17 @@ FETCH FIRST 1 ROW WITH TIES;
 
 \[
 \begin{aligned}
-&\lambda_{1}^{\mathrm{ties}}\Big(\\
-&\quad \tau_{\mathrm{exoplanets\_count}\downarrow}\Big(\\
-&\quad\quad \gamma_{\substack{
-    \mathrm{country};\\
-    \operatorname{COUNTD}(\mathrm{exo\_id})\rightarrow\mathrm{exoplanets\_count}
-}}\Big(\\
-&\quad\quad\quad \mathrm{observer}\\
-&\quad\quad\quad \bowtie_{\mathrm{observer\_id}}\mathrm{observation}
-\Big)\Big)\Big).
+&\lambda_{1}^{\mathrm{ties}}\Big(\
+&\quad \tau_{\mathrm{exoplanets_count}\downarrow}\Big(\
+&\quad\quad \gamma_{\mathrm{country; COUNTD(exo_id) \rightarrow exoplanets_count}}\Big(\
+&\quad\quad\quad \mathrm{observer}\
+&\quad\quad\quad \bowtie_{\mathrm{observer_id}} \mathrm{observation}\
+&\quad\quad\Big)\
+&\quad\Big)\
+&\Big)
 \end{aligned}
 \]
+
 
 Последовательность выполнения запроса приведена в табл. \ref{tab:q41plan}.
 
@@ -1492,17 +1482,17 @@ FETCH FIRST 1 ROW WITH TIES;
 
 \[
 \begin{aligned}
-&\lambda_{1}^{\mathrm{ties}}\Big(\\
-&\quad \tau_{\mathrm{exoplanets\_count}\uparrow}\Big(\\
-&\quad\quad \gamma_{\substack{
-    \mathrm{country};\\
-    \operatorname{COUNTD}(\mathrm{exo\_id})\rightarrow\mathrm{exoplanets\_count}
-}}\Big(\\
-&\quad\quad\quad \mathrm{observer}\\
-&\quad\quad\quad \bowtie_{\mathrm{observer\_id}}\mathrm{observation}
-\Big)\Big)\Big).
+&\lambda_{1}^{\mathrm{ties}}\Big(\
+&\quad \tau_{\mathrm{exoplanets_count}\uparrow}\Big(\
+&\quad\quad \gamma_{\mathrm{country; COUNTD(exo_id) \rightarrow exoplanets_count}}\Big(\
+&\quad\quad\quad \mathrm{observer}\
+&\quad\quad\quad \bowtie_{\mathrm{observer_id}} \mathrm{observation}\
+&\quad\quad\Big)\
+&\quad\Big)\
+&\Big)
 \end{aligned}
 \]
+
 
 Последовательность выполнения запроса приведена в табл. \ref{tab:q42plan}.
 
@@ -1565,22 +1555,19 @@ ORDER BY observations_count;
 
 Реляционная формула запроса:
 
-\[
+[
 \begin{aligned}
-&\tau_{\mathrm{observations\_count}}\Big(\\
-&\quad \gamma_{\substack{
-    \mathrm{observations\_count};\\
-    \operatorname{COUNT}(*)\rightarrow\mathrm{exoplanets\_count}
-}}\Big(\\
-&\quad\quad \gamma_{\substack{
-    \mathrm{exo\_id};\\
-    \operatorname{COUNT}(\mathrm{observation\_id})\rightarrow\mathrm{observations\_count}
-}}\Big(\\
-&\quad\quad\quad \mathrm{exoplanet}\\
-&\quad\quad\quad \mathbin{\operatorname{LEFTJOIN}}_{\mathrm{exo\_id}}\mathrm{observation}
-\Big)\Big)\Big).
+&\tau_{\mathrm{observations_count}}\Big(\
+&\quad \gamma_{\mathrm{observations_count; COUNT(*) \rightarrow exoplanets_count}}\Big(\
+&\quad\quad \gamma_{\mathrm{exo_id; COUNT(observation_id) \rightarrow observations_count}}\Big(\
+&\quad\quad\quad \mathrm{exoplanet}\
+&\quad\quad\quad \mathbin{\operatorname{LEFTJOIN}}_{\mathrm{exo_id}} \mathrm{observation}\
+&\quad\quad\Big)\
+&\quad\Big)\
+&\Big)
 \end{aligned}
-\]
+]
+
 
 Последовательность выполнения запроса приведена в табл. \ref{tab:q5plan}.
 
@@ -1672,28 +1659,24 @@ ORDER BY g.galaxy_id;
 
 Реляционная формула запроса:
 
-\[
+[
 \begin{aligned}
-&\tau_{\mathrm{galaxy\_id}}\Big(\\
-&\quad \sigma_{\mathrm{observed\_stars\_count}=0}\Big(\\
-&\quad\quad \gamma_{\substack{
-    \mathrm{galaxy\_id},\mathrm{conf\_plan},\mathrm{hab\_plan},\mathrm{dist};\\
-    \operatorname{COUNTD}(\mathrm{star\_id})\rightarrow\mathrm{observed\_stars\_count}
-}}\Big(\\
-&\quad\quad\quad \mathrm{galaxy}\\
-&\quad\quad\quad \mathbin{\operatorname{LEFTJOIN}}_{\mathrm{galaxy\_id}}\mathrm{cluster}\\
-&\quad\quad\quad \mathbin{\operatorname{LEFTJOIN}}_{\mathrm{cluster\_id}}\mathrm{stellar\_system}\\
-&\quad\quad\quad \mathbin{\operatorname{LEFTJOIN}}_{\mathrm{stellar\_id}=\mathrm{stell\_sys\_id}}\mathrm{plan\_system}\\
-&\quad\quad\quad \mathbin{\operatorname{LEFTJOIN}}_{\mathrm{system\_id}=\mathrm{sys\_id}}\mathrm{star}\\
-&\quad\quad\quad \mathbin{\operatorname{LEFTJOIN}}_{\mathrm{system\_id}=\mathrm{sys\_id}}\mathrm{exoplanet}\\
-&\quad\quad\quad \mathbin{\operatorname{LEFTJOIN}}_{\mathrm{exo\_id}}\mathrm{observation}\\
-&\quad\quad\quad \mathbin{\operatorname{LEFTJOIN}}_{\substack{
-    \mathrm{tele\_id}\ \land\\
-    \mathrm{tele\_type}=\mathrm{ground}
-}}\mathrm{telescope}
-\Big)\Big)\Big).
+&\tau_{\mathrm{galaxy_id}}\Big(\
+&\quad \sigma_{\mathrm{observed_stars_count} = 0}\Big(\
+&\quad\quad \gamma_{\mathrm{galaxy_id, conf_plan, hab_plan, dist; COUNTD(star_id) \rightarrow observed_stars_count}}\Big(\
+&\quad\quad\quad \mathrm{galaxy}\
+&\quad\quad\quad \mathbin{\operatorname{LEFTJOIN}}*{\mathrm{galaxy_id}} \mathrm{cluster}\
+&\quad\quad\quad \mathbin{\operatorname{LEFTJOIN}}*{\mathrm{cluster_id}} \mathrm{stellar_system}\
+&\quad\quad\quad \mathbin{\operatorname{LEFTJOIN}}*{\mathrm{stellar_id} = \mathrm{stell_sys_id}} \mathrm{plan_system}\
+&\quad\quad\quad \mathbin{\operatorname{LEFTJOIN}}*{\mathrm{system_id} = \mathrm{sys_id}} \mathrm{star}\
+&\quad\quad\quad \mathbin{\operatorname{LEFTJOIN}}*{\mathrm{system_id} = \mathrm{sys_id}} \mathrm{exoplanet}\
+&\quad\quad\quad \mathbin{\operatorname{LEFTJOIN}}*{\mathrm{exo_id}} \mathrm{observation}\
+&\quad\quad\quad \mathbin{\operatorname{LEFTJOIN}}_{\mathrm{tele_id} \land \mathrm{tele_type} = \mathrm{ground}} \mathrm{telescope}\
+&\quad\quad\Big)\
+&\quad\Big)\
+&\Big)
 \end{aligned}
-\]
+]
 
 Последовательность выполнения запроса приведена в табл. \ref{tab:q6plan}.
 
@@ -1768,31 +1751,24 @@ ORDER BY oc.exoplanets_count DESC, oc.observer_id;
 
 Реляционная формула запроса:
 
-\[
+[
 \begin{aligned}
-&\tau_{\mathrm{exoplanets\_count}\downarrow,\mathrm{observer\_id}}\Big(\\
-&\quad \sigma_{\substack{
-    \mathrm{observer\_id}\neq\mathrm{target.observer\_id}\ \land\\
-    \mathrm{exoplanets\_count}>\mathrm{target.exoplanets\_count}
-}}\Big(\\
-&\quad\quad \gamma_{\substack{
-    \mathrm{observer\_id},\mathrm{country};\\
-    \operatorname{COUNTD}(\mathrm{exo\_id})\rightarrow\mathrm{exoplanets\_count}
-}}\Big(\\
-&\quad\quad\quad \mathrm{observer}\\
-&\quad\quad\quad \mathbin{\operatorname{LEFTJOIN}}_{\mathrm{observer\_id}}\mathrm{observation}
-\Big)\\
-&\quad\quad \bowtie_{\mathrm{target.observer\_id}=\mathrm{Observer\_000001}}\,\rho_{\mathrm{target}}\Big(\\
-&\quad\quad\quad \gamma_{\substack{
-    \mathrm{observer\_id},\mathrm{country};\\
-    \operatorname{COUNTD}(\mathrm{exo\_id})\rightarrow\mathrm{exoplanets\_count}
-}}\Big(\\
-&\quad\quad\quad\quad \mathrm{observer}\\
-&\quad\quad\quad\quad \mathbin{\operatorname{LEFTJOIN}}_{\mathrm{observer\_id}}\mathrm{observation}
-\Big)\Big)
-\Big)\Big).
+&\tau_{\mathrm{exoplanets_count}\downarrow, \mathrm{observer_id}}\Big(\
+&\quad \sigma_{\mathrm{observer_id} \neq \mathrm{target.observer_id} \land \mathrm{exoplanets_count} > \mathrm{target.exoplanets_count}}\Big(\
+&\quad\quad \gamma_{\mathrm{observer_id, country; COUNTD(exo_id) \rightarrow exoplanets_count}}\Big(\
+&\quad\quad\quad \mathrm{observer}\
+&\quad\quad\quad \mathbin{\operatorname{LEFTJOIN}}*{\mathrm{observer_id}} \mathrm{observation}\
+&\quad\quad\Big)\
+&\quad\quad \bowtie*{\mathrm{target.observer_id} = \mathrm{Observer_000001}} , \rho_{\mathrm{target}}\Big(\
+&\quad\quad\quad \gamma_{\mathrm{observer_id, country; COUNTD(exo_id) \rightarrow exoplanets_count}}\Big(\
+&\quad\quad\quad\quad \mathrm{observer}\
+&\quad\quad\quad\quad \mathbin{\operatorname{LEFTJOIN}}_{\mathrm{observer_id}} \mathrm{observation}\
+&\quad\quad\quad\Big)\
+&\quad\quad\Big)\
+&\Big)\Big)
 \end{aligned}
-\]
+]
+
 
 Последовательность выполнения запроса приведена в табл. \ref{tab:q7plan}.
 
@@ -1863,20 +1839,19 @@ ORDER BY observations_count DESC, t.tele_id, countries.country;
 
 Реляционная формула запроса:
 
-\[
+[
 \begin{aligned}
-&\tau_{\mathrm{observations\_count}\downarrow,\mathrm{tele\_id},\mathrm{country}}\Big(\\
-&\quad \big(\mathrm{telescope}\times \operatorname{enum\_range}(\mathrm{country\_enum})\big)\\
-&\quad \mathbin{\operatorname{LEFTJOIN}}_{\mathrm{tele\_id},\mathrm{country}}
-    \gamma_{\substack{
-    \mathrm{tele\_id},\mathrm{country};\\
-    \operatorname{COUNT}(*)\rightarrow\mathrm{observations\_count}
-}}\Big(\\
-&\quad\quad \mathrm{observation}\\
-&\quad\quad \bowtie_{\mathrm{observer\_id}}\mathrm{observer}
-\Big)\Big).
+&\tau_{\mathrm{observations_count}\downarrow, \mathrm{tele_id}, \mathrm{country}}\Big(\
+&\quad \big(\mathrm{telescope} \times \operatorname{enum_range}(\mathrm{country_enum})\big)\
+&\quad \mathbin{\operatorname{LEFTJOIN}}*{\mathrm{tele_id, country}}
+\gamma*{\mathrm{tele_id, country; COUNT(*) \rightarrow observations_count}}\Big(\
+&\quad\quad \mathrm{observation}\
+&\quad\quad \bowtie_{\mathrm{observer_id}} \mathrm{observer}\
+&\quad\Big)\
+&\Big)
 \end{aligned}
-\]
+]
+
 
 Последовательность выполнения запроса приведена в табл. \ref{tab:q8plan}.
 
@@ -2020,20 +1995,21 @@ RETURNING
 
 Реляционная формула запроса:
 
-\[
+[
 \begin{aligned}
-&\pi_{\mathrm{observation\_id, exo\_id, tele\_id; old\_observer\_id, new\_observer\_id, obs\_date}}\Big(\\
-&\quad \operatorname{UPDATE}_{\mathrm{observer\_id} \leftarrow \mathrm{Observer\_000001}}\Big(\\
-&\quad\quad \sigma_{\mathrm{tele\_id = TELE\_00056 \land exo\_id = EXO\_021009 \land observer\_id \neq Observer\_000001}}\big(\mathrm{observation}\big)\\
+&\pi_{\mathrm{observation_id, exo_id, tele_id; old_observer_id, new_observer_id, obs_date}}\Big(\
+&\quad \operatorname{UPDATE}*{\mathrm{observer_id} \leftarrow \mathrm{Observer_000001}}\Big(\
+&\quad\quad \sigma*{\mathrm{tele_id = TELE_00056 \land exo_id = EXO_021009 \land observer_id \neq Observer_000001}}\big(\mathrm{observation}\big)\
 &\quad\quad \setminus\
-\pi_{\operatorname{attrs}(\mathrm{observation})}\Big(\\
-&\quad\quad\quad \sigma_{\mathrm{tele\_id = TELE\_00056 \land exo\_id = EXO\_021009}}\big(\mathrm{observation}\big)\\
-&\quad\quad\quad \ \bowtie_{\mathrm{exo\_id, tele\_id, obs\_date}}
-\sigma_{\mathrm{observer\_id = Observer\_000001}}\big(\mathrm{observation}\big)
-\Big)\Big)\\
+\pi_{\operatorname{attrs}(\mathrm{observation})}\Big(\
+&\quad\quad\quad \sigma_{\mathrm{tele_id = TELE_00056 \land exo_id = EXO_021009}}\big(\mathrm{observation}\big)\
+&\quad\quad\quad \ \bowtie_{\mathrm{exo_id, tele_id, obs_date}}
+\sigma_{\mathrm{observer_id = Observer_000001}}\big(\mathrm{observation}\big)
+\Big)\Big)\
 &\Big)
 \end{aligned}
-\]
+]
+
 
 Последовательность выполнения запроса приведена в табл. \ref{tab:q9plan}.
 
