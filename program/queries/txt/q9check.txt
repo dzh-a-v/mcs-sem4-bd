@@ -1,0 +1,10 @@
+SELECT
+    observation_id,
+    exo_id,
+    tele_id,
+    observer_id,
+    obs_date
+FROM observation
+WHERE tele_id = 'TELE_00056'
+  AND exo_id = 'EXO_021009'
+ORDER BY obs_date, observation_id;

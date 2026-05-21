@@ -1,0 +1,9 @@
+SELECT
+    tele_id,
+    exo_id,
+    COUNT(*) AS observations_count
+FROM observation
+GROUP BY tele_id, exo_id
+HAVING COUNT(*) > 1
+ORDER BY observations_count DESC, tele_id, exo_id
+LIMIT 20;

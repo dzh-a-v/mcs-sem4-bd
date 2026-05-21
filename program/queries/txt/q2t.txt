@@ -1,0 +1,16 @@
+SELECT
+    o.observer_id,
+    t.tele_type,
+    COUNT(DISTINCT s.star_id) AS stars_count
+FROM observation o
+JOIN telescope t
+    ON t.tele_id = o.tele_id
+JOIN exoplanet e
+    ON e.exo_id = o.exo_id
+JOIN plan_system ps
+    ON ps.system_id = e.sys_id
+JOIN star s
+    ON s.sys_id = ps.system_id
+WHERE o.observer_id = 'Observer_000001'
+  AND t.tele_type = 'ground'
+GROUP BY o.observer_id, t.tele_type;

@@ -1,0 +1,9 @@
+SELECT
+    obs.country,
+    COUNT(DISTINCT o.exo_id) AS exoplanets_count
+FROM observer obs
+JOIN observation o
+    ON o.observer_id = obs.observer_id
+GROUP BY obs.country
+ORDER BY exoplanets_count ASC
+FETCH FIRST 1 ROW WITH TIES;

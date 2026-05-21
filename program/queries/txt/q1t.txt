@@ -1,0 +1,35 @@
+SELECT
+    t.tele_id,
+    t.tele_type,
+    t.aper,
+    t.com_year,
+    t.oper,
+    t.discov_plan,
+    COUNT(DISTINCT o.observation_id) AS observations_count,
+    COUNT(DISTINCT e.exo_id) AS exoplanets_count
+FROM telescope t
+JOIN observation o
+    ON o.tele_id = t.tele_id
+JOIN exoplanet e
+    ON e.exo_id = o.exo_id
+JOIN plan_system ps
+    ON ps.system_id = e.sys_id
+JOIN star s
+    ON s.sys_id = ps.system_id
+JOIN stellar_system ss
+    ON ss.stellar_id = ps.stell_sys_id
+JOIN cluster c
+    ON c.cluster_id = ss.cluster_id
+JOIN galaxy g
+    ON g.galaxy_id = c.galaxy_id
+WHERE e.exo_type = 'terrestrial'
+  AND g.galaxy_id = 'GAL_0001'
+  AND s.class = 'G'
+GROUP BY
+    t.tele_id,
+    t.tele_type,
+    t.aper,
+    t.com_year,
+    t.oper,
+    t.discov_plan
+ORDER BY t.tele_id;
