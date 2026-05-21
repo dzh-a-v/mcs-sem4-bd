@@ -1,22 +1,19 @@
-WITH observed_counts AS MATERIALIZED (
-    SELECT
-        o.tele_id,
-        obs.country,
-        COUNT(*) AS observations_count
-    FROM observation o
-    JOIN observer obs
-        ON obs.observer_id = o.observer_id
-    GROUP BY o.tele_id, obs.country
-)
 SELECT
     t.tele_id,
-    t.tele_type,
-    t.oper,
-    countries.country,
-    COALESCE(oc.observations_count, 0) AS observations_count
-FROM telescope t
-CROSS JOIN unnest(enum_range(NULL::country_enum)) AS countries(country)
-LEFT JOIN observed_counts oc
-    ON oc.tele_id = t.tele_id
-   AND oc.country = countries.country
-ORDER BY observations_count DESC, t.tele_id, countries.country;
+    c.country,
+    COUNT(o.observation_id) AS observation_count
+FROM (
+    SELECT tele_id
+    FROM telescope
+    ORDER BY tele_id
+    LIMIT 20
+) AS t
+CROSS JOIN (
+    SELECT UNNEST(ENUM_RANGE(NULL::country_enum)) AS country
+    ORDER BY country
+    LIMIT 20
+) AS c
+LEFT JOIN observation AS o ON o.tele_id = t.tele_id
+LEFT JOIN observer AS obs ON o.observer_id = obs.observer_id AND obs.country = c.country
+GROUP BY t.tele_id, c.country
+ORDER BY t.tele_id, c.country;
