@@ -1,4 +1,10 @@
-WITH observer_counts AS MATERIALIZED (
+SELECT
+    oc.observer_id,
+    oc.country,
+    oc.exoplanets_count,
+    target.exoplanets_count AS target_exoplanets_count
+FROM (
+    -- Первый экземпляр observer_counts (для основного списка наблюдателей)
     SELECT
         obs.observer_id,
         obs.country,
@@ -7,15 +13,20 @@ WITH observer_counts AS MATERIALIZED (
     LEFT JOIN observation o
         ON o.observer_id = obs.observer_id
     GROUP BY obs.observer_id, obs.country
-)
-SELECT
-    oc.observer_id,
-    oc.country,
-    oc.exoplanets_count,
-    target.exoplanets_count AS target_exoplanets_count
-FROM observer_counts oc
-JOIN observer_counts target
-    ON target.observer_id = 'Observer_000001'
+) AS oc
+JOIN (
+    -- Второй экземпляр observer_counts (для целевого наблюдателя 'Observer_000001')
+    SELECT
+        obs.observer_id,
+        obs.country,
+        COUNT(DISTINCT o.exo_id) AS exoplanets_count
+    FROM observer obs
+    LEFT JOIN observation o
+        ON o.observer_id = obs.observer_id
+    WHERE obs.observer_id = 'Observer_000001'
+    GROUP BY obs.observer_id, obs.country
+) AS target
+    ON TRUE  -- Условие соединения задаётся в WHERE, поэтому здесь просто TRUE
 WHERE oc.observer_id <> target.observer_id
   AND oc.exoplanets_count > target.exoplanets_count
 ORDER BY oc.exoplanets_count DESC, oc.observer_id;
