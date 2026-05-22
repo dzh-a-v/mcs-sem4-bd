@@ -9,14 +9,14 @@ script_file <- sub("^--file=", "", file_arg[1])
 script_dir <- dirname(normalizePath(script_file, mustWork = TRUE))
 results_dir <- normalizePath(file.path(script_dir, "..", "results"), mustWork = FALSE)
 
-input_file <- file.path(results_dir, "query8.csv")
+input_file <- file.path(results_dir, "telescope_country_observations.csv")  # Имя файла соответствует Python‑скрипту
 
 if (!file.exists(input_file)) {
   stop(
     paste(
       "Input file does not exist:",
       input_file,
-      "\nRun query8.py first to create query8.csv."
+      "\nRun the Python script first to create the CSV."
     )
   )
 }
@@ -25,57 +25,63 @@ if (!requireNamespace("rgl", quietly = TRUE)) {
   stop("Package 'rgl' is required. Install it with install.packages('rgl').")
 }
 
+# Чтение данных
 data <- read.csv(input_file, stringsAsFactors = FALSE)
 
-required_columns <- c("tele_id", "tele_type", "oper", "country", "observations_count")
+# Проверка обязательных колонок
+required_columns <- c("tele_id", "country", "observation_count")
 missing_columns <- setdiff(required_columns, names(data))
 
 if (length(missing_columns) > 0) {
   stop(
     paste(
-      "Missing columns in query8.csv:",
+      "Missing columns in CSV:",
       paste(missing_columns, collapse = ", ")
     )
   )
 }
 
+# Ограничение до первых 20 телескопов и стран (по порядку появления в данных)
 top_telescopes_count <- 20
 top_countries_count <- 20
 
-top_telescopes <- sort(unique(data$tele_id))
-top_telescopes <- head(top_telescopes, top_telescopes_count)
+# Берём первые N уникальных значений в порядке появления
+top_telescopes <- unique(data$tele_id)[1:top_telescopes_count]
+top_countries <- unique(data$country)[1:top_countries_count]
 
-top_countries <- sort(unique(data$country))
-top_countries <- head(top_countries, top_countries_count)
+# Фильтрация данных
+data_filtered <- data[
+  data$tele_id %in% top_telescopes &
+  data$country %in% top_countries,
+]
 
-data <- data[data$tele_id %in% top_telescopes & data$country %in% top_countries, ]
-data <- data[order(data$tele_id, data$country), ]
-
-if (nrow(data) == 0) {
+if (nrow(data_filtered) == 0) {
   stop("No data left after selecting top telescopes and countries.")
 }
 
-data$tele_index <- as.integer(factor(data$tele_id, levels = top_telescopes))
-data$country_index <- as.integer(factor(data$country, levels = top_countries))
-data$observations_count <- as.numeric(data$observations_count)
-data <- data[!is.na(data$observations_count), ]
+# Преобразование категорий в числовые индексы для координат
+data_filtered$tele_index <- as.integer(factor(data_filtered$tele_id, levels = top_telescopes))
+data_filtered$country_index <- as.integer(factor(data_filtered$country, levels = top_countries))
+data_filtered$observation_count <- as.numeric(data_filtered$observation_count)
+data_filtered <- data_filtered[!is.na(data_filtered$observation_count), ]
 
-max_count <- max(data$observations_count)
+# Цветовая палитра
+max_count <- max(data_filtered$observation_count)
 palette <- grDevices::hcl.colors(100, palette = "Viridis")
 
-if (max_count > min(data$observations_count)) {
+if (max_count > min(data_filtered$observation_count)) {
   color_index <- cut(
-    data$observations_count,
+    data_filtered$observation_count,
     breaks = 100,
     labels = FALSE,
     include.lowest = TRUE
   )
 } else {
-  color_index <- rep(50, nrow(data))
+  color_index <- rep(50, nrow(data_filtered))
 }
-
 colors <- palette[color_index]
 
+# Функции для построения 3D-баров
 close_rgl_devices <- function() {
   while (rgl::rgl.cur() != 0) {
     rgl::close3d()
@@ -88,7 +94,7 @@ make_bars_vertices <- function(plot_data) {
   y0 <- plot_data$country_index - 0.35
   y1 <- plot_data$country_index + 0.35
   z0 <- rep(0, nrow(plot_data))
-  z1 <- plot_data$observations_count
+  z1 <- plot_data$observation_count
 
   vx <- cbind(x0, x1, x1, x0, x0, x1, x1, x0)
   vy <- cbind(y0, y0, y1, y1, y0, y0, y1, y1)
@@ -116,7 +122,7 @@ make_bar_edges <- function(plot_data) {
   y0 <- plot_data$country_index - 0.35
   y1 <- plot_data$country_index + 0.35
   z0 <- rep(0, nrow(plot_data))
-  z1 <- plot_data$observations_count
+  z1 <- plot_data$observation_count
 
   vx <- cbind(x0, x1, x1, x0, x0, x1, x1, x0)
   vy <- cbind(y0, y0, y1, y1, y0, y0, y1, y1)
@@ -185,30 +191,35 @@ draw_z_perimeter_grid <- function(x_count, y_count, max_z) {
   )
 }
 
+# Основной блок отрисовки
 close_rgl_devices()
 rgl::open3d()
 rgl::bg3d(color = "white")
 rgl::material3d(specular = "gray35")
-draw_z_perimeter_grid(length(top_telescopes), length(top_countries), max_count)
+
+# Рисуем сетку
+draw_z_perimeter_grid(
+  length(top_telescopes),
+  length(top_countries),
+  max_count
+)
+
+# Рисуем бары
 rgl::quads3d(
-  make_bars_vertices(data),
+  make_bars_vertices(data_filtered),
   col = rep(colors, each = 6),
   alpha = 0.9
 )
+
+# Рисуем рёбра баров
 rgl::segments3d(
-  make_bar_edges(data),
+  make_bar_edges(data_filtered),
   col = "white",
   alpha = 0.95,
   lwd = 1
 )
 
-# rgl::title3d(
-  # main = "Observations by telescope and country, first 20 by alphabet",
-  # xlab = "Telescope",
-  # ylab = "Country",
-  # zlab = "Observations"
-# )
-
+# Подписи осей
 rgl::text3d(
   x = seq_along(top_telescopes),
   y = 0,
@@ -227,11 +238,21 @@ rgl::text3d(
   adj = c(1, 0.5)
 )
 
+# Заголовок
+# rgl::title3d(
+#   main = "Observations by telescope and country (first 20)",
+#   xlab = "Telescope",
+#   ylab = "Country",
+#   zlab = "Observations"
+# )
+
+# Настройка вида
 rgl::view3d(theta = 40, phi = 25, zoom = 0.75)
 
 cat("Opened interactive 3D histogram for first 20 telescopes and countries.\n")
 cat("Use the mouse to rotate, zoom, and move the chart.\n")
 
+# Ожидание закрытия окна
 while (rgl::rgl.cur() != 0) {
   Sys.sleep(0.2)
 }

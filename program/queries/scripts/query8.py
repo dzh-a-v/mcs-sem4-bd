@@ -1,8 +1,3 @@
-# Для каждого телескопа и для каждой страны посчитать число наблюдений.
-# Построить 3D-гистограмму.
-# Данный Python-скрипт сохраняет данные в CSV; интерактивная гистограмма
-# строится отдельным R-скриптом query8_histogram.R.
-
 import argparse
 import csv
 from getpass import getpass
@@ -10,46 +5,41 @@ from pathlib import Path
 
 import psycopg2
 
-
+# Запрос с CROSS JOIN для первых 20 телескопов и 20 стран
 QUERY = """
-WITH observed_counts AS MATERIALIZED (
-    SELECT
-        o.tele_id,
-        obs.country,
-        COUNT(*) AS observations_count
-    FROM observation o
-    JOIN observer obs
-        ON obs.observer_id = o.observer_id
-    GROUP BY o.tele_id, obs.country
-)
 SELECT
     t.tele_id,
-    t.tele_type::text AS tele_type,
-    t.oper,
-    countries.country::text AS country,
-    COALESCE(oc.observations_count, 0) AS observations_count
-FROM telescope t
-CROSS JOIN unnest(enum_range(NULL::country_enum)) AS countries(country)
-LEFT JOIN observed_counts oc
-    ON oc.tele_id = t.tele_id
-   AND oc.country = countries.country
-ORDER BY observations_count DESC, t.tele_id, country;
+    c.country::text AS country,
+    COUNT(o.observation_id) AS observation_count
+FROM (
+    SELECT tele_id
+    FROM telescope
+    ORDER BY tele_id
+    LIMIT 20
+) AS t
+CROSS JOIN (
+    SELECT UNNEST(ENUM_RANGE(NULL::country_enum)) AS country
+    ORDER BY country
+    LIMIT 20
+) AS c
+LEFT JOIN observation AS o ON o.tele_id = t.tele_id
+LEFT JOIN observer AS obs ON o.observer_id = obs.observer_id AND obs.country = c.country
+GROUP BY t.tele_id, c.country
+ORDER BY t.tele_id, c.country;
 """
-
 
 def parse_args():
     parser = argparse.ArgumentParser(
         description=(
-            "Count observations for every telescope and observer country pair."
+            "Count observations for first 20 telescopes and first 20 countries."
         )
     )
-    parser.add_argument("--dbname", default="mydb")
-    parser.add_argument("--user", default="postgres")
-    parser.add_argument("--host", default=None)
-    parser.add_argument("--port", default=None)
-    parser.add_argument("--ask-password", action="store_true")
+    parser.add_argument("--dbname", default="mydb", help="Database name")
+    parser.add_argument("--user", default="postgres", help="Database user")
+    parser.add_argument("--host", default=None, help="Database host")
+    parser.add_argument("--port", default=None, help="Database port")
+    parser.add_argument("--ask-password", action="store_true", help="Prompt for password")
     return parser.parse_args()
-
 
 def connect(args):
     params = {
@@ -66,7 +56,6 @@ def connect(args):
 
     return psycopg2.connect(**params)
 
-
 def save_csv(path, headers, rows):
     path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -75,10 +64,10 @@ def save_csv(path, headers, rows):
         writer.writerow(headers)
         writer.writerows(rows)
 
-
 def main():
     args = parse_args()
-    output_path = Path(__file__).resolve().parent.parent / "results" / "query8.csv"
+    # Путь к файлу: папка results рядом со скриптом
+    output_path = Path(__file__).resolve().parent / "results" / "telescope_country_observations.csv"
 
     with connect(args) as conn:
         with conn.cursor() as cur:
@@ -89,7 +78,6 @@ def main():
     save_csv(output_path, headers, rows)
 
     print(f"Saved {len(rows)} rows to {output_path}")
-
 
 if __name__ == "__main__":
     main()

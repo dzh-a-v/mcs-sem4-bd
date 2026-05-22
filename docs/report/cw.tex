@@ -110,7 +110,8 @@
 	%\flushleft
 	\newpage
 	%\justifying
-	
+	\justifying
+    
 	\section*{Реферат}
 	\addcontentsline{toc}{section}{Реферат}
 	Предметной областью данной работы является каталогизация экзопланет и связанных с ними астрономических объектов. Основная проблема заключается в разрозненности сведений об экзопланетах, звёздах, галактиках, телескопах и наблюдениях, что затрудняет централизованное хранение данных, сопоставление параметров объектов и выполнение аналитических запросов.
@@ -125,8 +126,6 @@
 	\tableofcontents
 	
 	\newpage
-	
-	\justifying
 	
 	\section*{Введение}
 	\addcontentsline{toc}{section}{Введение}
@@ -1165,7 +1164,6 @@ GROUP BY
     t.oper,
     t.discov_plan
 ORDER BY t.tele_id;
-
 \end{lstlisting}
 
 Реляционная формула запроса:
@@ -1303,7 +1301,7 @@ GROUP BY o.observer_id, t.tele_type;
 \end{figure}
 
 
-Время выполнения запроса: 150.509 мс.
+Время выполнения запроса: 54.028 мс.
 
 \subsubsection{Запрос 3}
 
@@ -1319,11 +1317,11 @@ SELECT
     COUNT(DISTINCT s.star_id) AS stars_count,
     COUNT(DISTINCT o.observation_id) AS observations_count
 FROM star s
-LEFT JOIN plan_system ps
+JOIN plan_system ps
     ON ps.system_id = s.sys_id
-LEFT JOIN exoplanet e
+JOIN exoplanet e
     ON e.sys_id = ps.system_id
-LEFT JOIN observation o
+JOIN observation o
     ON o.exo_id = e.exo_id
 GROUP BY s.class
 ORDER BY s.class;
@@ -1555,12 +1553,11 @@ SELECT
     observations_count,
     COUNT(*) AS exoplanets_count
 FROM (
-    -- количество наблюдений для каждого экзопланеты
     SELECT
         e.exo_id,
         COUNT(o.observation_id) AS observations_count
     FROM exoplanet e
-    LEFT JOIN observation o
+    JOIN observation o
         ON o.exo_id = e.exo_id
     GROUP BY e.exo_id
 ) AS exoplanet_observations 
@@ -1730,37 +1727,19 @@ ORDER BY g.galaxy_id;
 
 \begin{lstlisting}[language=SQL, caption={Текст запроса №7}, label={lst:q7t}]
 SELECT
-    oc.observer_id,
-    oc.country,
-    oc.exoplanets_count,
-    target.exoplanets_count AS target_exoplanets_count
-FROM (
-    -- Первый экземпляр observer_counts (для основного списка наблюдателей)
-    SELECT
-        obs.observer_id,
-        obs.country,
-        COUNT(DISTINCT o.exo_id) AS exoplanets_count
-    FROM observer obs
-    LEFT JOIN observation o
-        ON o.observer_id = obs.observer_id
-    GROUP BY obs.observer_id, obs.country
-) AS oc
-JOIN (
-    -- Второй экземпляр observer_counts (для целевого наблюдателя 'Observer_000001')
-    SELECT
-        obs.observer_id,
-        obs.country,
-        COUNT(DISTINCT o.exo_id) AS exoplanets_count
-    FROM observer obs
-    LEFT JOIN observation o
-        ON o.observer_id = obs.observer_id
-    WHERE obs.observer_id = 'Observer_000001'
-    GROUP BY obs.observer_id, obs.country
-) AS target
-    ON TRUE  -- Условие соединения задаётся в WHERE, поэтому здесь просто TRUE
-WHERE oc.observer_id <> target.observer_id
-  AND oc.exoplanets_count > target.exoplanets_count
-ORDER BY oc.exoplanets_count DESC, oc.observer_id;
+    obs.observer_id,
+    obs.country,
+    COUNT(DISTINCT o.exo_id) AS exoplanets_count
+FROM observer obs
+JOIN observation o ON o.observer_id = obs.observer_id
+GROUP BY obs.observer_id, obs.country
+HAVING COUNT(DISTINCT o.exo_id) > (
+    SELECT COUNT(DISTINCT o2.exo_id)
+    FROM observer obs2
+    JOIN observation o2 ON o2.observer_id = obs2.observer_id
+    WHERE obs2.observer_id = 'Observer_0000001'
+)
+ORDER BY COUNT(DISTINCT o.exo_id) DESC, obs.observer_id;
 \end{lstlisting}
 
 Реляционная формула запроса:

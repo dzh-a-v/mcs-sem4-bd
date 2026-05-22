@@ -12,4 +12,3 @@ HAVING COUNT(DISTINCT o.exo_id) > (
     WHERE obs2.observer_id = 'Observer_0000001'
 )
 ORDER BY COUNT(DISTINCT o.exo_id) DESC, obs.observer_id;
-.
