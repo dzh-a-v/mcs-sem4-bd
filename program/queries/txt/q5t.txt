@@ -6,7 +6,7 @@ FROM (
         e.exo_id,
         COUNT(o.observation_id) AS observations_count
     FROM exoplanet e
-    LEFT JOIN observation o
+    JOIN observation o
         ON o.exo_id = e.exo_id
     GROUP BY e.exo_id
 ) AS exoplanet_observations 

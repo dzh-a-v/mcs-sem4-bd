@@ -11,5 +11,5 @@ HAVING COUNT(DISTINCT o.exo_id) > (
     JOIN observation o2 ON o2.observer_id = obs2.observer_id
     WHERE obs2.observer_id = 'Observer_0000001'
 )
-  AND obs.observer_id <> 'Observer_0000001'
 ORDER BY COUNT(DISTINCT o.exo_id) DESC, obs.observer_id;
+.
