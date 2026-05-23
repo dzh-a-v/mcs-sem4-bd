@@ -1635,26 +1635,19 @@ ORDER BY observations_count;
 Текст запроса на SQL приведён в листинге \ref{lst:q6t}.
 
 \begin{lstlisting}[language=SQL, caption={Текст запроса №6}, label={lst:q6t}]
-SELECT
-    g.galaxy_id,
-    g.conf_plan,
-    g.hab_plan,
-    g.dist,
-    'ground'::tele_type_enum AS tele_type,
-    0 AS observed_stars_count
+SELECT g.galaxy_id
 FROM galaxy g
 WHERE NOT EXISTS (
     SELECT 1
     FROM cluster c
-    JOIN stellar_system ss ON ss.cluster_id = c.cluster_id
-    JOIN plan_system ps ON ps.stell_sys_id = ss.stellar_id
-    JOIN star s ON s.sys_id = ps.system_id
+    JOIN stellar_system s ON s.cluster_id = c.cluster_id
+    JOIN plan_system ps ON ps.stell_sys_id = s.stellar_id
     JOIN exoplanet e ON e.sys_id = ps.system_id
     JOIN observation o ON o.exo_id = e.exo_id
-    JOIN telescope t ON t.tele_id = o.tele_id AND t.tele_type = 'ground'
+    JOIN telescope t ON t.tele_id = o.tele_id
     WHERE c.galaxy_id = g.galaxy_id
-)
-ORDER BY g.galaxy_id;
+      AND t.tele_type = 'ground'
+);
 \end{lstlisting}
 
 Реляционная формула запроса:
@@ -1711,7 +1704,7 @@ ORDER BY g.galaxy_id;
 	\label{q6r}
 \end{figure}
 
-Время выполнения запроса: 146.693 мс.
+Время выполнения запроса: 114.952 мс.
 
 \subsubsection{Запрос 7}
 
@@ -1806,28 +1799,24 @@ ORDER BY COUNT(DISTINCT o.exo_id) DESC, obs.observer_id;
 Текст запроса на SQL приведён в листинге \ref{lst:q8t}.
 
 \begin{lstlisting}[language=SQL, caption={Текст запроса №8}, label={lst:q8t}]
-WITH observed_counts AS MATERIALIZED (
-    SELECT
-        o.tele_id,
-        obs.country,
-        COUNT(*) AS observations_count
-    FROM observation o
-    JOIN observer obs
-        ON obs.observer_id = o.observer_id
-    GROUP BY o.tele_id, obs.country
-)
-SELECT
-    t.tele_id,
-    t.tele_type,
-    t.oper,
-    countries.country,
-    COALESCE(oc.observations_count, 0) AS observations_count
-FROM telescope t
-CROSS JOIN unnest(enum_range(NULL::country_enum)) AS countries(country)
-LEFT JOIN observed_counts oc
-    ON oc.tele_id = t.tele_id
-   AND oc.country = countries.country
-ORDER BY observations_count DESC, t.tele_id, countries.country;
+SELECT t.tele_id, c.country, COUNT(o.observation_id)
+FROM
+    (SELECT tele_id
+     FROM telescope
+     ORDER BY tele_id
+     LIMIT 20) t
+CROSS JOIN
+    (SELECT DISTINCT country
+     FROM observer
+     ORDER BY country
+     LIMIT 20) c
+JOIN observer ob
+    ON ob.country = c.country
+JOIN observation o
+    ON o.observer_id = ob.observer_id
+   AND o.tele_id = t.tele_id
+GROUP BY t.tele_id, c.country
+ORDER BY t.tele_id, c.country;
 \end{lstlisting}
 
 Реляционная формула запроса:
@@ -1888,7 +1877,7 @@ ORDER BY observations_count DESC, t.tele_id, countries.country;
 	\label{q8h}
 \end{figure}
 
-Время выполнения запроса: 799.293 мс.
+Время выполнения запроса: 42.186 мс.
 
 \subsubsection{Запрос 9}
 
@@ -1956,35 +1945,20 @@ ORDER BY obs_date, observation_id;
 Текст запроса на SQL приведён в листинге \ref{lst:q9t}.
 
 \begin{lstlisting}[language=SQL, caption={Текст запроса №9}, label={lst:q9t}]
-WITH rows_to_update AS (
-    SELECT
-        o.observation_id,
-        o.observer_id AS old_observer_id
-    FROM observation o
-    WHERE o.tele_id = 'TELE_00056'
-      AND o.exo_id = 'EXO_021009'
-      AND o.observer_id <> 'Observer_000001'
-      AND NOT EXISTS (
-          SELECT 1
-          FROM observation duplicate
-          WHERE duplicate.exo_id = o.exo_id
-            AND duplicate.tele_id = o.tele_id
-            AND duplicate.observer_id = 'Observer_000001'
-            AND duplicate.obs_date = o.obs_date
-      )
-)
-UPDATE observation o
+UPDATE observation
 SET observer_id = 'Observer_000001'
-FROM rows_to_update old
-WHERE o.observation_id = old.observation_id
-RETURNING
-    o.observation_id,
-    o.exo_id,
-    o.tele_id,
-    old.old_observer_id,
-    o.observer_id AS new_observer_id,
-    o.obs_date;
+WHERE tele_id = 'TELE_00056'
+  AND exo_id = 'EXO_021009';
 \end{lstlisting}
+
+Результат изображён на рис. \ref{q9r1}.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.85\linewidth]{images/queries/q9r1.png}
+	\caption{Результат выполнения девятого запроса.}
+	\label{q9r1}
+\end{figure}
 
 Реляционная формула запроса:
 
@@ -2026,7 +2000,7 @@ RETURNING
 
 Запрос сначала формирует набор строк, которые нужно изменить, и отдельно запоминает старое значение наблюдателя. Проверка \texttt{NOT EXISTS} исключает строки, для которых обновление создало бы дубликат по ограничению уникальности. Затем выполняется обновление таблицы \texttt{observation}, а блок \texttt{RETURNING} показывает результат замены.
 
-Время выполнения запроса: 25.008 мс.
+Время выполнения запроса: 0.973 мс.
 
 На рис. \ref{q9change} видно сравнение старых и новых значений поля observer.
 
@@ -2062,7 +2036,6 @@ ORDER BY obs_date, observation_id;
 \end{figure}
 
 Время выполнения запроса: 1.093 мс.
-
 
 \newpage
 
