@@ -1,40 +1,18 @@
--- SELECT
---     g.galaxy_id,
---     g.conf_plan,
---     g.hab_plan,
---     g.dist,
---     'ground'::tele_type_enum AS tele_type,
---     0 AS observed_stars_count
--- FROM galaxy g
--- LEFT JOIN cluster c ON c.galaxy_id = g.galaxy_id
--- LEFT JOIN stellar_system ss ON ss.cluster_id = c.cluster_id
--- LEFT JOIN plan_system ps ON ps.stell_sys_id = ss.stellar_id
--- LEFT JOIN star s ON s.sys_id = ps.system_id
--- LEFT JOIN exoplanet e ON e.sys_id = ps.system_id
--- LEFT JOIN observation o ON o.exo_id = e.exo_id
--- LEFT JOIN telescope t ON t.tele_id = o.tele_id AND t.tele_type = 'ground'
--- WHERE t.tele_id IS NULL
--- ORDER BY g.galaxy_id;
-
-
-
--- -- SELECT
--- --     t.tele_id,
--- --     t.tele_type,
--- --     t.oper,
--- --     countries.country,
--- --     COALESCE(oc.observations_count, 0) AS observations_count
--- --     -- oc.observations_count AS observations_count
--- -- FROM telescope t
--- -- CROSS JOIN UNNEST(ENUM_RANGE(NULL::country_enum)) AS countries(country)
--- -- LEFT JOIN (
--- --     SELECT
--- --         o.tele_id,
--- --         obs.country,
--- --         COUNT(*) AS observations_count
--- --     FROM observation o
--- --     JOIN observer obs ON obs.observer_id = o.observer_id
--- --     GROUP BY o.tele_id, obs.country
--- -- ) AS oc ON oc.tele_id = t.tele_id AND oc.country = countries.country
--- -- ORDER BY observations_count DESC, t.tele_id, countries.country;
--- -- --9,11-17
+SELECT t.tele_id, c.country, COUNT(o.observation_id)
+FROM
+    (SELECT tele_id
+     FROM telescope
+     ORDER BY tele_id
+     LIMIT 20) t
+CROSS JOIN
+    (SELECT DISTINCT country
+     FROM observer
+     ORDER BY country
+     LIMIT 20) c
+LEFT JOIN observer ob
+    ON ob.country = c.country
+LEFT JOIN observation o
+    ON o.observer_id = ob.observer_id
+   AND o.tele_id = t.tele_id
+GROUP BY t.tele_id, c.country
+ORDER BY t.tele_id, c.country;

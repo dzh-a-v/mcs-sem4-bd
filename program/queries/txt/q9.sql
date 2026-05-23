@@ -1,43 +1,4 @@
 UPDATE observation
 SET observer_id = 'Observer_000001'
 WHERE tele_id = 'TELE_00056'
-  AND exo_id = 'EXO_021009'
-  -- AND observer_id <> 'Observer_000001'
-  AND NOT observer_id = 'Observer_000001'
-  AND NOT EXISTS (
-      SELECT 1
-      FROM observation duplicate
-      WHERE duplicate.exo_id = observation.exo_id
-        AND duplicate.tele_id = observation.tele_id
-        AND duplicate.observer_id = 'Observer_000001'
-        AND duplicate.obs_date = observation.obs_date
-  );
-
-
-UPDATE observation o
-SET observer_id = 'Observer_000001'
-WHERE o.observation_id IN (
-    SELECT o2.observation_id
-    FROM observation o2
-    WHERE o2.tele_id = 'TELE_00056'
-      AND o2.exo_id = 'EXO_021009'
-      AND o2.observer_id <> 'Observer_000001'
-      AND NOT EXISTS (
-          SELECT 1
-          FROM observation duplicate
-          WHERE duplicate.exo_id = o2.exo_id
-            AND duplicate.tele_id = o2.tele_id
-            AND duplicate.observer_id = 'Observer_000001'
-            AND duplicate.obs_date = o2.obs_date
-      )
-)
--- RETURNING
---     o.observation_id,
---     o.exo_id,
---     o.tele_id,
---     o.observer_id AS old_observer_id,
---     'Observer_000001' AS new_observer_id,
---     o.obs_date;
-;
-
--- можно проще
+  AND exo_id = 'EXO_021009';

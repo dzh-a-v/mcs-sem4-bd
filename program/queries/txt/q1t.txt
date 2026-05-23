@@ -22,12 +22,4 @@ JOIN galaxy g
     ON g.galaxy_id = c.galaxy_id
 WHERE e.exo_type = 'terrestrial'
   AND g.galaxy_id = 'GAL_0001'
-  AND s.class = 'G'
-GROUP BY
-    t.tele_id,
-    t.tele_type,
-    t.aper,
-    t.com_year,
-    t.oper,
-    t.discov_plan
-ORDER BY t.tele_id;
+  AND s.class = 'G';
