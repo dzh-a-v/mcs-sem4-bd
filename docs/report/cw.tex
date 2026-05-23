@@ -111,6 +111,11 @@
 	\newpage
 	%\justifying
 	\justifying
+
+	
+	\tableofcontents
+
+    \newpage
     
 	\section*{Реферат}
 	\addcontentsline{toc}{section}{Реферат}
@@ -121,9 +126,6 @@
 	Сформированы и выполнены девять запросов, включая выборку телескопов по параметрам наблюдаемых экзопланет, подсчёт наблюдавшихся звёзд, анализ распределений по классам звёзд и числу наблюдений, поиск стран с экстремальными значениями, сравнение активности наблюдателей, подсчёт наблюдений по странам и телескопам, а также обновление записей наблюдений. Для запросов приведены тексты SQL, реляционные формулы, последовательности выполнения, текстовые пояснения и фрагменты результатов.
 
 	База данных содержит 273~166 записей в 9 таблицах. Для заполнения использовался язык Python с библиотекой \textit{psycopg2}; построение графиков результатов выполнено средствами языка R. Все запросы выполнялись в СУБД PostgreSQL на ноутбуке HP Pavilion Gaming Laptop 16-a0xxx с процессором Intel(R) Core(TM) i7-10750H CPU, 6 ядер, 2.60 ГГц, и 16 ГБ оперативной памяти.
-	\newpage
-	
-	\tableofcontents
 	
 	\newpage
 	
@@ -1170,20 +1172,44 @@ ORDER BY t.tele_id;
 
 \[
 \begin{aligned}
-&\tau_{\mathrm{tele_id}}\Big(\
-&\quad \gamma_{\mathrm{tele_id, tele_type, aper, com_year, oper, discov_plan;}}\Big(\
-&\quad\quad \sigma_{\mathrm{exo_type = terrestrial \land galaxy_id = GAL_0001 \land class = G}}\Big(\
-&\quad\quad\quad \mathrm{telescope}\
-&\quad\quad\quad \bowtie_{\mathrm{tele_id}} \mathrm{observation}\
-&\quad\quad\quad \bowtie_{\mathrm{exo_id}} \mathrm{exoplanet}\
-&\quad\quad\quad \bowtie_{\mathrm{sys_id}} \mathrm{plan_system}\
-&\quad\quad\quad \bowtie_{\mathrm{sys_id}} \mathrm{star}\
-&\quad\quad\quad \bowtie_{\mathrm{stellar_id}} \mathrm{stellar_system}\
-&\quad\quad\quad \bowtie_{\mathrm{cluster_id}} \mathrm{cluster}\
-&\quad\quad\quad \bowtie_{\mathrm{galaxy_id}} \mathrm{galaxy}\
-&\quad\quad\Big)\
-&\quad\Big)\
-&\Big)
+&\tau_{\mathrm{telescope.tele\_id}}\Big(
+\gamma_{\substack{
+\mathrm{telescope.tele\_id,\ telescope.tele\_type,\ telescope.aper,}\\
+\mathrm{telescope.com\_year,\ telescope.oper,\ telescope.discov\_plan}
+}}\Big(\\
+&\sigma_{\mathrm{
+exoplanet.exo\_type = terrestrial \land galaxy.galaxy\_id = GAL\_0001 \land star.class = G
+}}\Big(
+\\
+&\quad
+\mathrm{telescope}
+\bowtie_{\mathrm{telescope.tele\_id = observation.tele\_id}}
+\mathrm{observation}
+\\
+&\quad
+\bowtie_{\mathrm{observation.exo\_id = exoplanet.exo\_id}}
+\mathrm{exoplanet}
+\\
+&\quad
+\bowtie_{\mathrm{exoplanet.sys\_id = plan\_system.system\_id}}
+\mathrm{plan\_system}
+\\
+&\quad
+\bowtie_{\mathrm{star.sys\_id = plan\_system.system\_id}}
+\mathrm{star}
+\\
+&\quad
+\bowtie_{\mathrm{stellar\_system.stellar\_id = plan\_system.stell\_sys\_id}}
+\mathrm{stellar\_system}
+\\
+&\quad
+\bowtie_{\mathrm{cluster.cluster\_id = stellar\_system.cluster\_id}}
+\mathrm{cluster}
+\\
+&\quad
+\bowtie_{\mathrm{galaxy.galaxy\_id = cluster.galaxy\_id}}
+\mathrm{galaxy}
+\Big)\Big)\Big)
 \end{aligned}
 \]
 
@@ -1198,23 +1224,28 @@ ORDER BY t.tele_id;
 		\toprule
 		Шаг & Операция & Описание \\
 		\midrule
-		1 & Scan & Чтение таблиц телескопов, наблюдений, экзопланет, планетарных систем, звёзд, звёздных систем, скоплений и галактик. \\
-		2 & Join & Соединение наблюдений с телескопами и экзопланетами. \\
-		3 & Join & Переход от экзопланет к планетарным системам, звёздам, звёздным системам, скоплениям и галактикам. \\
-		4 & Filter & Отбор записей с типом экзопланеты terrestrial, галактикой GAL\_0001 и классом звезды G. \\
-		5 & GroupAggregate & Группировка по телескопу и подсчёт различных наблюдений и экзопланет. \\
-		6 & Sort & Сортировка результата по идентификатору телескопа. \\
+		1 & Scan & Чтение таблиц \texttt{telescope}, \texttt{observation}, \texttt{exoplanet}, \texttt{plan\_system}, \texttt{star}, \texttt{stellar\_system}, \texttt{cluster}, \texttt{galaxy}. \\
+		2 & Join & Соединение телескопов с наблюдениями по условию \texttt{t.tele\_id = o.tele\_id}. \\
+		3 & Join & Соединение наблюдений с экзопланетами по условию \texttt{o.exo\_id = e.exo\_id}. \\
+		4 & Join & Соединение экзопланет с планетарными системами по условию \texttt{e.sys\_id = ps.system\_id}. \\
+		5 & Join & Соединение планетарных систем со звёздами по условию \texttt{s.sys\_id = ps.system\_id}. \\
+		6 & Join & Соединение планетарных систем со звёздными системами по условию \texttt{ss.stellar\_id = ps.stell\_sys\_id}. \\
+		7 & Join & Соединение звёздных систем со скоплениями по условию \texttt{c.cluster\_id = ss.cluster\_id}. \\
+		8 & Join & Соединение скоплений с галактиками по условию \texttt{g.galaxy\_id = c.galaxy\_id}. \\
+		9 & Filter & Отбор строк, где тип экзопланеты равен \texttt{terrestrial}, галактика равна \texttt{GAL\_0001}, а класс звезды равен \texttt{G}. \\
+		10 & GroupAggregate & Группировка по полям телескопа для исключения повторов. \\
+		11 & Sort & Сортировка результата по идентификатору телескопа. \\
 		\bottomrule
 	\end{tabularx}
 \end{table}
 
-Планировщик строит цепочку соединений от наблюдений к астрономическим объектам и применяет фильтры по типу экзопланеты, галактике и классу звезды. После этого строки группируются по телескопам, для каждой группы вычисляется количество различных наблюдений и экзопланет, затем результат сортируется по идентификатору телескопа.
+Запрос связывает телескопы с наблюдениями по \texttt{tele\_id}, затем переходит к экзопланетам по \texttt{exo\_id}. Далее экзопланеты связываются с планетарными системами по \texttt{sys\_id = system\_id}, звёзды --- с теми же планетарными системами по \texttt{star.sys\_id = plan\_system.system\_id}, а затем через звёздные системы и скопления определяется галактика. После этого применяются фильтры по типу экзопланеты, галактике и классу звезды.
 
 Фрагмент результата выполнения первого запроса приведён на рис. \ref{q1r}.
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.85\linewidth]{images/queries/q1r.png}
+	\includegraphics[width=1\linewidth]{images/queries/q1r.png}
 	\caption{Фрагмент результата выполнения первого запроса.}
 	\label{q1r}
 \end{figure}
@@ -1257,18 +1288,34 @@ GROUP BY o.observer_id, t.tele_type;
 
 \[
 \begin{aligned}
-&\gamma_{\mathrm{observer_id, tele_type; COUNTD(star_id)}}\Big(\
-&\quad \sigma_{\mathrm{observer_id = Observer_000001 \land tele_type = ground}}\Big(\
-&\quad\quad \mathrm{observation}\
-&\quad\quad \bowtie_{\mathrm{tele_id}} \mathrm{telescope}\
-&\quad\quad \bowtie_{\mathrm{exo_id}} \mathrm{exoplanet}\
-&\quad\quad \bowtie_{\mathrm{sys_id}} \mathrm{plan_system}\
-&\quad\quad \bowtie_{\mathrm{sys_id}} \mathrm{star}\
-&\quad\quad \Big)\
-&\Big)
+&\gamma_{\substack{
+\mathrm{observation.observer\_id,\ telescope.tele\_type;}\\
+\mathrm{COUNTD(star.star\_id) \rightarrow stars\_count}
+}}\Big(\\
+&\sigma_{\substack{
+\mathrm{observation.observer\_id = Observer\_000001}\\
+\mathrm{\land\ telescope.tele\_type = ground}
+}}\Big(
+\\
+&\quad
+\mathrm{observation}
+\bowtie_{\mathrm{observation.tele\_id = telescope.tele\_id}}
+\mathrm{telescope}
+\\
+&\quad
+\bowtie_{\mathrm{observation.exo\_id = exoplanet.exo\_id}}
+\mathrm{exoplanet}
+\\
+&\quad
+\bowtie_{\mathrm{exoplanet.sys\_id = plan\_system.system\_id}}
+\mathrm{plan\_system}
+\\
+&\quad
+\bowtie_{\mathrm{star.sys\_id = plan\_system.system\_id}}
+\mathrm{star}
+\Big)\Big)
 \end{aligned}
 \]
-
 
 Последовательность выполнения запроса приведена в табл. \ref{tab:q2plan}.
 
@@ -1281,25 +1328,27 @@ GROUP BY o.observer_id, t.tele_type;
 		\toprule
 		Шаг & Операция & Описание \\
 		\midrule
-		1 & Filter & Отбор наблюдений, выполненных наблюдателем Observer\_000001. \\
-		2 & Join & Соединение наблюдений с телескопами. \\
-		3 & Filter & Отбор телескопов типа ground. \\
-		4 & Join & Соединение с экзопланетами, планетарными системами и звёздами. \\
-		5 & GroupAggregate & Группировка по наблюдателю и типу телескопа, подсчёт различных звёзд. \\
+		1 & Scan & Чтение таблиц \texttt{observation}, \texttt{telescope}, \texttt{exoplanet}, \texttt{plan\_system}, \texttt{star}. \\
+		2 & Join & Соединение наблюдений с телескопами по условию \texttt{o.tele\_id = t.tele\_id}. \\
+		3 & Join & Соединение наблюдений с экзопланетами по условию \texttt{o.exo\_id = e.exo\_id}. \\
+		4 & Join & Соединение экзопланет с планетарными системами по условию \texttt{e.sys\_id = ps.system\_id}. \\
+		5 & Join & Соединение планетарных систем со звёздами по условию \texttt{s.sys\_id = ps.system\_id}. \\
+		6 & Filter & Отбор строк для наблюдателя \texttt{Observer\_000001} и телескопов типа \texttt{ground}. \\
+		7 & GroupAggregate & Группировка по наблюдателю и типу телескопа, подсчёт различных звёзд. \\
 		\bottomrule
 	\end{tabularx}
 \end{table}
 
-Сначала выбираются наблюдения нужного наблюдателя, после чего они связываются с телескопами и ограничиваются наземным типом. Затем через экзопланету и планетарную систему определяется множество звёзд, а агрегирование считает количество различных звёзд в найденной группе.
+Запрос берёт наблюдения заданного наблюдателя и соединяет их с телескопами по \texttt{tele\_id}. Затем по \texttt{exo\_id} определяется экзопланета, по \texttt{sys\_id = system\_id} --- планетарная система, а по \texttt{star.sys\_id = plan\_system.system\_id} --- звезда. После фильтрации по наземным телескопам считается число различных звёзд.
 
 Фрагмент результата выполнения второго запроса приведён на рис. \ref{q2r}.
+
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.85\linewidth]{images/queries/q2r.png}
 	\caption{Фрагмент результата выполнения второго запроса.}
 	\label{q2r}
 \end{figure}
-
 
 Время выполнения запроса: 54.028 мс.
 
@@ -1331,17 +1380,27 @@ ORDER BY s.class;
 
 \[
 \begin{aligned}
-&\tau_{\mathrm{class}}\Big(\
-&\quad \gamma_{\mathrm{class; COUNTD(star_id), COUNTD(observation_id)}}\Big(\
-&\quad\quad \mathrm{star}\
-&\quad\quad \mathbin{\operatorname{LEFTJOIN}}*{\mathrm{sys_id}} \mathrm{plan_system}\
-&\quad\quad \mathbin{\operatorname{LEFTJOIN}}*{\mathrm{system_id = sys_id}} \mathrm{exoplanet}\
-&\quad\quad \mathbin{\operatorname{LEFTJOIN}}_{\mathrm{exo_id}} \mathrm{observation}\
-&\quad\quad \Big)\
-&\Big)
+&\tau_{\mathrm{star.class}}\Big(
+\gamma_{\substack{
+\mathrm{star.class;\ COUNTD(star.star\_id) \rightarrow stars\_count,}\\
+\mathrm{COUNTD(observation.observation\_id) \rightarrow observations\_count}
+}}\Big(
+\\
+&\quad
+\mathrm{star}
+\bowtie_{\mathrm{star.sys\_id = plan\_system.system\_id}}
+\mathrm{plan\_system}
+\\
+&\quad
+\bowtie_{\mathrm{exoplanet.sys\_id = plan\_system.system\_id}}
+\mathrm{exoplanet}
+\\
+&\quad
+\bowtie_{\mathrm{observation.exo\_id = exoplanet.exo\_id}}
+\mathrm{observation}
+\Big)\Big)
 \end{aligned}
 \]
-
 
 Последовательность выполнения запроса приведена в табл. \ref{tab:q3plan}.
 
@@ -1354,17 +1413,17 @@ ORDER BY s.class;
 		\toprule
 		Шаг & Операция & Описание \\
 		\midrule
-		1 & Scan & Чтение таблицы звёзд. \\
-		2 & Left Join & Присоединение планетарных систем к звёздам. \\
-		3 & Left Join & Присоединение экзопланет к планетарным системам. \\
-		4 & Left Join & Присоединение наблюдений к экзопланетам. \\
-		5 & GroupAggregate & Группировка по классу звезды, подсчёт звёзд и наблюдений. \\
-		6 & Sort & Сортировка классов звёзд. \\
+		1 & Scan & Чтение таблиц \texttt{star}, \texttt{plan\_system}, \texttt{exoplanet}, \texttt{observation}. \\
+		2 & Join & Соединение звёзд с планетарными системами по условию \texttt{s.sys\_id = ps.system\_id}. \\
+		3 & Join & Соединение планетарных систем с экзопланетами по условию \texttt{e.sys\_id = ps.system\_id}. \\
+		4 & Join & Соединение экзопланет с наблюдениями по условию \texttt{o.exo\_id = e.exo\_id}. \\
+		5 & GroupAggregate & Группировка по классу звезды, подсчёт различных звёзд и различных наблюдений. \\
+		6 & Sort & Сортировка результата по классу звезды. \\
 		\bottomrule
 	\end{tabularx}
 \end{table}
 
-Запрос начинает выполнение с таблицы звёзд, поэтому классы без наблюдений не теряются. Внешние соединения добавляют связанные планетарные системы, экзопланеты и наблюдения, после чего агрегирование считает число различных звёзд и наблюдений для каждого класса.
+Запрос начинает со звёзд и по условию \texttt{star.sys\_id = plan\_system.system\_id} связывает их с планетарными системами. Затем через \texttt{exoplanet.sys\_id = plan\_system.system\_id} добавляются экзопланеты, а через \texttt{observation.exo\_id = exoplanet.exo\_id} --- наблюдения. После этого выполняется группировка по классу звезды.
 
 Фрагмент результата выполнения третьего запроса приведён на рис. \ref{q3r}.
 
@@ -1379,7 +1438,7 @@ ORDER BY s.class;
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.85\linewidth]{images/queries/q3h.png}
+	\includegraphics[width=1\linewidth]{images/queries/q3h.png}
 	\caption{Гистограмма результата выполнения третьего запроса.}
 	\label{q3h}
 \end{figure}
@@ -1420,13 +1479,22 @@ ORDER BY exoplanets_count DESC;
 
 \[
 \begin{aligned}
-&\tau_{\mathrm{exoplanets\_count} \downarrow}\Bigg( \\
-&\quad \pi_{\mathrm{country},\, \mathrm{exoplanets\_count}}\Bigg( \\
-&\quad\quad \sigma_{\mathrm{exoplanets\_count} \geq \mathrm{all\_other\_counts}}\Bigg( \\
-&\quad\quad\quad \rho_{\mathrm{temp}}(\gamma_{\mathrm{country};\, \text{COUNTD}(\mathrm{exo\_id}) \to \mathrm{exoplanets\_count}}(\mathrm{observer} \bowtie_{\mathrm{observer\_id}} \mathrm{observation})) \\
-&\quad\quad \Bigg) \\
-&\quad \Bigg) \\
-&\Bigg)
+&R =
+\gamma_{\substack{
+\mathrm{observer.country;}\\
+\mathrm{COUNTD(observation.exo\_id) \rightarrow exoplanets\_count}
+}}\Big(\\
+& \mathrm{observer}
+\bowtie_{\mathrm{observer.observer\_id = observation.observer\_id}}
+\mathrm{observation}
+\Big)
+\\
+&\tau_{\mathrm{exoplanets\_count}\downarrow}\Big(
+\sigma_{\substack{
+\mathrm{R.exoplanets\_count =}\\
+\mathrm{MAX(R.exoplanets\_count)}
+}}(R)
+\Big)
 \end{aligned}
 \]
 
@@ -1441,16 +1509,17 @@ ORDER BY exoplanets_count DESC;
 		\toprule
 		Шаг & Операция & Описание \\
 		\midrule
-		1 & Scan & Чтение наблюдателей и наблюдений. \\
-		2 & Join & Соединение наблюдений со странами наблюдателей. \\
-		3 & GroupAggregate & Группировка по стране и подсчёт различных экзопланет. \\
-		4 & Sort & Сортировка стран по убыванию числа экзопланет. \\
-		5 & Fetch First With Ties & Выбор страны или стран с максимальным значением. \\
+		1 & Scan & Чтение таблиц \texttt{observer} и \texttt{observation}. \\
+		2 & Join & Соединение наблюдателей с наблюдениями по условию \texttt{obs.observer\_id = o.observer\_id}. \\
+		3 & GroupAggregate & Группировка по стране наблюдателя и подсчёт различных экзопланет по \texttt{o.exo\_id}. \\
+		4 & Subquery Aggregate & В подзапросе повторяется соединение \texttt{o2.observer\_id = obs2.observer\_id} и находится максимальное значение количества экзопланет. \\
+		5 & Filter & Отбор стран, у которых количество экзопланет равно найденному максимуму. \\
+		6 & Sort & Сортировка результата по убыванию количества экзопланет. \\
 		\bottomrule
 	\end{tabularx}
 \end{table}
 
-Запрос связывает каждое наблюдение со страной наблюдателя, затем считает количество различных экзопланет для каждой страны. После сортировки по убыванию выбирается верхняя строка вместе со всеми строками, имеющими такое же максимальное значение.
+Запрос соединяет наблюдателей с наблюдениями по \texttt{observer\_id} и считает количество различных экзопланет для каждой страны. Во вложенной части выполняется такое же соединение по \texttt{observer\_id}, после чего находится максимальное количество. В основной части остаются страны, значение которых равно этому максимуму.
 
 Фрагмент результата выполнения запроса 4.1 приведён на рис. \ref{q41r}.
 
@@ -1497,17 +1566,24 @@ ORDER BY exoplanets_count DESC;
 
 \[
 \begin{aligned}
-&\lambda_{1}^{\mathrm{ties}}\Big(\\
-&\quad \tau_{\mathrm{exoplanets_count}\uparrow}\Big(\\
-&\quad\quad \gamma_{\mathrm{country; COUNTD(exo_id) \rightarrow exoplanets_count}}\Big(\\
-&\quad\quad\quad \mathrm{observer}\\
-&\quad\quad\quad \bowtie_{\mathrm{observer_id}} \mathrm{observation}\\
-&\quad\quad\Big)\\
-&\quad\Big)\\
-&\Big)
+&R =
+\gamma_{\substack{
+\mathrm{observer.country;}\\
+\mathrm{COUNTD(observation.exo\_id) \rightarrow exoplanets\_count}
+}}\Big(\\
+&\mathrm{observer}
+\bowtie_{\mathrm{observer.observer\_id = observation.observer\_id}}
+\mathrm{observation}
+\Big)
+\\
+&\tau_{\mathrm{exoplanets\_count}\downarrow}\Big(
+\sigma_{\substack{
+\mathrm{R.exoplanets\_count =}\\
+\mathrm{MIN(R.exoplanets\_count)}
+}}(R)
+\Big)
 \end{aligned}
 \]
-
 
 Последовательность выполнения запроса приведена в табл. \ref{tab:q42plan}.
 
@@ -1520,14 +1596,17 @@ ORDER BY exoplanets_count DESC;
 		\toprule
 		Шаг & Операция & Описание \\
 		\midrule
-		1 & Scan & Чтение наблюдателей и наблюдений. \\
-		2 & Join & Соединение наблюдений со странами наблюдателей. \\
-		3 & GroupAggregate & Группировка по стране и подсчёт различных экзопланет. \\
-		4 & Sort & Сортировка стран по возрастанию числа экзопланет. \\
-		5 & Fetch First With Ties & Выбор страны или стран с минимальным значением. \\
+		1 & Scan & Чтение таблиц \texttt{observer} и \texttt{observation}. \\
+		2 & Join & Соединение наблюдателей с наблюдениями по условию \texttt{obs.observer\_id = o.observer\_id}. \\
+		3 & GroupAggregate & Группировка по стране наблюдателя и подсчёт различных экзопланет по \texttt{o.exo\_id}. \\
+		4 & Subquery Aggregate & В подзапросе повторяется соединение \texttt{o2.observer\_id = obs2.observer\_id} и находится минимальное значение количества экзопланет. \\
+		5 & Filter & Отбор стран, у которых количество экзопланет равно найденному минимуму. \\
+		6 & Sort & Сортировка результата по количеству экзопланет. \\
 		\bottomrule
 	\end{tabularx}
 \end{table}
+
+Запрос соединяет наблюдателей с наблюдениями по \texttt{observer\_id} и считает количество различных экзопланет для каждой страны. Во вложенной части выполняется такое же соединение по \texttt{observer\_id}, после чего находится минимальное количество. В основной части остаются страны, значение которых равно этому минимуму.
 
 Фрагмент результата выполнения запроса 4.2 приведён на рис. \ref{q42r}.
 
@@ -1569,14 +1648,22 @@ ORDER BY observations_count;
 
 \[
 \begin{aligned}
-&\tau_{\mathrm{observations_count}}\Big(\\
-&\quad \gamma_{\mathrm{observations_count; COUNT(*) \rightarrow exoplanets_count}}\Big(\\
-&\quad\quad \gamma_{\mathrm{exo_id; COUNT(observation_id) \rightarrow observations_count}}\Big(\\
-&\quad\quad\quad \mathrm{exoplanet}\\
-&\quad\quad\quad \mathbin{\operatorname{LEFTJOIN}}_{\mathrm{exo_id}} \mathrm{observation}\\
-&\quad\quad\Big)\\
-&\quad\Big)\\
-&\Big)
+&R =
+\gamma_{\substack{
+\mathrm{exoplanet.exo\_id;}\\
+\mathrm{COUNT(observation.observation\_id) \rightarrow observations\_count}
+}}\Big(\\
+&\mathrm{exoplanet}
+\bowtie_{\mathrm{exoplanet.exo\_id = observation.exo\_id}}
+\mathrm{observation}
+\Big)
+\\
+&\tau_{\mathrm{observations\_count}}\Big(
+\gamma_{\substack{
+\mathrm{observations\_count;}\\
+\mathrm{COUNT(*) \rightarrow exoplanets\_count}
+}}(R)
+\Big)
 \end{aligned}
 \]
 
@@ -1591,16 +1678,16 @@ ORDER BY observations_count;
 		\toprule
 		Шаг & Операция & Описание \\
 		\midrule
-		1 & Scan & Чтение экзопланет и наблюдений. \\
-		2 & Left Join & Присоединение наблюдений к каждой экзопланете, включая экзопланеты без наблюдений. \\
-		3 & GroupAggregate & Подсчёт числа наблюдений для каждой экзопланеты. \\
-		4 & GroupAggregate & Подсчёт количества экзопланет для каждого полученного числа наблюдений. \\
+		1 & Scan & Чтение таблиц \texttt{exoplanet} и \texttt{observation}. \\
+		2 & Join & Соединение экзопланет с наблюдениями по условию \texttt{e.exo\_id = o.exo\_id}. \\
+		3 & GroupAggregate & Группировка по \texttt{e.exo\_id} и подсчёт числа наблюдений для каждой экзопланеты. \\
+		4 & GroupAggregate & Группировка по полученному числу наблюдений и подсчёт количества экзопланет для каждого значения. \\
 		5 & Sort & Сортировка результата по числу наблюдений. \\
 		\bottomrule
 	\end{tabularx}
 \end{table}
 
-Запрос выполняет агрегирование в два уровня. Сначала для каждой экзопланеты считается число связанных наблюдений, затем результат группируется повторно, чтобы определить, сколько экзопланет имеют одинаковое количество наблюдений.
+Запрос соединяет экзопланеты с наблюдениями по \texttt{exo\_id}. Сначала считается число наблюдений для каждой экзопланеты, затем результат группируется по этому числу, чтобы определить, сколько экзопланет имеют одинаковое количество наблюдений.
 
 Фрагмент результата выполнения пятого запроса приведён на рис. \ref{q5r}.
 
@@ -1615,7 +1702,7 @@ ORDER BY observations_count;
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.85\linewidth]{images/queries/q5h.png}
+	\includegraphics[width=1\linewidth]{images/queries/q5h.png}
 	\caption{Гистограмма результата выполнения пятого запроса.}
 	\label{q5h}
 \end{figure}
@@ -1654,20 +1741,36 @@ WHERE NOT EXISTS (
 
 \[
 \begin{aligned}
-&\tau_{\mathrm{galaxy_id}}\Big(\\
-&\quad \sigma_{\mathrm{observed_stars_count} = 0}\Big(\\
-&\quad\quad \gamma_{\mathrm{galaxy_id, conf_plan, hab_plan, dist; COUNTD(star_id) \rightarrow observed_stars_count}}\Big(\\
-&\quad\quad\quad \mathrm{galaxy}\\
-&\quad\quad\quad \mathbin{\operatorname{LEFTJOIN}}*{\mathrm{galaxy_id}} \mathrm{cluster}\\
-&\quad\quad\quad \mathbin{\operatorname{LEFTJOIN}}*{\mathrm{cluster_id}} \mathrm{stellar_system}\\
-&\quad\quad\quad \mathbin{\operatorname{LEFTJOIN}}*{\mathrm{stellar_id} = \mathrm{stell_sys_id}} \mathrm{plan_system}\\
-&\quad\quad\quad \mathbin{\operatorname{LEFTJOIN}}*{\mathrm{system_id} = \mathrm{sys_id}} \mathrm{star}\\
-&\quad\quad\quad \mathbin{\operatorname{LEFTJOIN}}*{\mathrm{system_id} = \mathrm{sys_id}} \mathrm{exoplanet}\\
-&\quad\quad\quad \mathbin{\operatorname{LEFTJOIN}}*{\mathrm{exo_id}} \mathrm{observation}\\
-&\quad\quad\quad \mathbin{\operatorname{LEFTJOIN}}_{\mathrm{tele_id} \land \mathrm{tele_type} = \mathrm{ground}} \mathrm{telescope}\\
-&\quad\quad\Big)\\
-&\quad\Big)\\
-&\Big)
+&\pi_{\mathrm{galaxy.galaxy\_id}}(\mathrm{galaxy})
+-
+\pi_{\mathrm{galaxy.galaxy\_id}}\Big(
+\sigma_{\mathrm{telescope.tele\_type = ground}}\Big(
+\\
+&\quad
+\mathrm{galaxy}
+\bowtie_{\mathrm{galaxy.galaxy\_id = cluster.galaxy\_id}}
+\mathrm{cluster}
+\\
+&\quad
+\bowtie_{\mathrm{stellar\_system.cluster\_id = cluster.cluster\_id}}
+\mathrm{stellar\_system}
+\\
+&\quad
+\bowtie_{\mathrm{plan\_system.stell\_sys\_id = stellar\_system.stellar\_id}}
+\mathrm{plan\_system}
+\\
+&\quad
+\bowtie_{\mathrm{exoplanet.sys\_id = plan\_system.system\_id}}
+\mathrm{exoplanet}
+\\
+&\quad
+\bowtie_{\mathrm{observation.exo\_id = exoplanet.exo\_id}}
+\mathrm{observation}
+\\
+&\quad
+\bowtie_{\mathrm{telescope.tele\_id = observation.tele\_id}}
+\mathrm{telescope}
+\Big)\Big)
 \end{aligned}
 \]
 
@@ -1682,24 +1785,26 @@ WHERE NOT EXISTS (
 		\toprule
 		Шаг & Операция & Описание \\
 		\midrule
-		1 & Scan & Чтение таблицы галактик. \\
-		2 & Left Join & Присоединение скоплений, звёздных систем, планетарных систем и звёзд. \\
-		3 & Left Join & Присоединение экзопланет и наблюдений. \\
-		4 & Left Join + Filter & Присоединение только наземных телескопов. \\
-		5 & GroupAggregate & Группировка по галактикам и подсчёт различных наблюдавшихся звёзд. \\
-		6 & Having & Отбор галактик, где число таких звёзд равно нулю. \\
-		7 & Sort & Сортировка результата по идентификатору галактики. \\
+		1 & Scan & Чтение таблицы \texttt{galaxy}. \\
+		2 & Subquery Join & В подзапросе скопления связываются с текущей галактикой по условию \texttt{c.galaxy\_id = g.galaxy\_id}. \\
+		3 & Join & Соединение скоплений со звёздными системами по условию \texttt{s.cluster\_id = c.cluster\_id}. \\
+		4 & Join & Соединение звёздных систем с планетарными системами по условию \texttt{ps.stell\_sys\_id = s.stellar\_id}. \\
+		5 & Join & Соединение планетарных систем с экзопланетами по условию \texttt{e.sys\_id = ps.system\_id}. \\
+		6 & Join & Соединение экзопланет с наблюдениями по условию \texttt{o.exo\_id = e.exo\_id}. \\
+		7 & Join & Соединение наблюдений с телескопами по условию \texttt{t.tele\_id = o.tele\_id}. \\
+		8 & Filter & Отбор наблюдений, где тип телескопа равен \texttt{ground}. \\
+		9 & Anti Join & Условие \texttt{NOT EXISTS} оставляет только галактики, для которых подзапрос не нашёл строк. \\
 		\bottomrule
 	\end{tabularx}
 \end{table}
 
-Запрос сохраняет все галактики за счёт внешних соединений, а затем постепенно присоединяет связанные уровни иерархии. Условие на тип телескопа применяется при соединении с таблицей телескопов, поэтому агрегирование считает только звёзды, наблюдавшиеся через наземные телескопы; оператор \texttt{HAVING} оставляет галактики с нулевым количеством таких звёзд.
+Запрос перебирает галактики и для каждой из них проверяет наличие наземных наблюдений. В подзапросе галактика связывается со скоплениями по \texttt{galaxy\_id}, затем со звёздными системами по \texttt{cluster\_id}, с планетарными системами по \texttt{stellar\_id = stell\_sys\_id}, с экзопланетами по \texttt{system\_id = sys\_id}, с наблюдениями по \texttt{exo\_id} и с телескопами по \texttt{tele\_id}. Если для галактики не найдено ни одной строки с \texttt{tele\_type = ground}, она попадает в результат.
 
 Фрагмент результата выполнения шестого запроса приведён на рис. \ref{q6r}.
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.85\linewidth]{images/queries/q6r.png}
+	\includegraphics[width=0.7\linewidth]{images/queries/q6r.png}
 	\caption{Фрагмент результата выполнения шестого запроса.}
 	\label{q6r}
 \end{figure}
@@ -1739,22 +1844,43 @@ ORDER BY COUNT(DISTINCT o.exo_id) DESC, obs.observer_id;
 
 \[
 \begin{aligned}
-&\tau_{\mathrm{exoplanets_count}\downarrow, \mathrm{observer_id}}\Big(\
-&\quad \sigma_{\mathrm{observer_id} \neq \mathrm{target.observer_id} \land \mathrm{exoplanets_count} > \mathrm{target.exoplanets_count}}\Big(\
-&\quad\quad \gamma_{\mathrm{observer_id, country; COUNTD(exo_id) \rightarrow exoplanets_count}}\Big(\
-&\quad\quad\quad \mathrm{observer}\
-&\quad\quad\quad \mathbin{\operatorname{LEFTJOIN}}*{\mathrm{observer_id}} \mathrm{observation}\
-&\quad\quad\Big)\
-&\quad\quad \bowtie*{\mathrm{target.observer_id} = \mathrm{Observer_000001}} , \rho_{\mathrm{target}}\Big(\
-&\quad\quad\quad \gamma_{\mathrm{observer_id, country; COUNTD(exo_id) \rightarrow exoplanets_count}}\Big(\
-&\quad\quad\quad\quad \mathrm{observer}\
-&\quad\quad\quad\quad \mathbin{\operatorname{LEFTJOIN}}_{\mathrm{observer_id}} \mathrm{observation}\
-&\quad\quad\quad\Big)\
-&\quad\quad\Big)\
-&\Big)\Big)
+&R =
+\gamma_{\substack{
+\mathrm{observer.observer\_id,\ observer.country;}\\
+\mathrm{COUNTD(observation.exo\_id) \rightarrow exoplanets\_count}
+}}\Big(\\
+&\mathrm{observer}
+\bowtie_{\mathrm{observer.observer\_id = observation.observer\_id}}
+\mathrm{observation}
+\Big)
+\\
+\\
+&Target =
+\gamma_{\substack{
+\mathrm{observer.observer\_id;}\\
+\mathrm{COUNTD(observation.exo\_id) \rightarrow target\_count}
+}}\Big(\\
+&\sigma_{\substack{
+\mathrm{observer.observer\_id =}
+\mathrm{Observer\_0000001}
+}}\Big(\\
+&\mathrm{observer}
+\bowtie_{\mathrm{observer.observer\_id = observation.observer\_id}}
+\mathrm{observation}
+\Big)\Big)
+\\
+\\
+&\tau_{\substack{
+\mathrm{exoplanets\_count}\downarrow,\\
+\mathrm{observer\_id}
+}}\Big(
+\sigma_{\substack{
+\mathrm{R.exoplanets\_count >}\\
+\mathrm{Target.target\_count}
+}}(R \times Target)
+\Big)
 \end{aligned}
 \]
-
 
 Последовательность выполнения запроса приведена в табл. \ref{tab:q7plan}.
 
@@ -1767,23 +1893,24 @@ ORDER BY COUNT(DISTINCT o.exo_id) DESC, obs.observer_id;
 		\toprule
 		Шаг & Операция & Описание \\
 		\midrule
-		1 & Materialized CTE & Формирование временного набора observer\_counts. \\
-		2 & Left Join & Присоединение наблюдений к каждому наблюдателю. \\
-		3 & GroupAggregate & Подсчёт различных экзопланет для каждого наблюдателя. \\
-		4 & Filter & Выбор строки целевого наблюдателя Observer\_000001. \\
-		5 & Join + Filter & Сравнение всех наблюдателей с целевым и отбор тех, у кого экзопланет больше. \\
-		6 & Sort & Сортировка по убыванию числа экзопланет и идентификатору наблюдателя. \\
+		1 & Scan & Чтение таблиц \texttt{observer} и \texttt{observation}. \\
+		2 & Join & Соединение наблюдателей с наблюдениями по условию \texttt{obs.observer\_id = o.observer\_id}. \\
+		3 & GroupAggregate & Группировка по \texttt{obs.observer\_id} и \texttt{obs.country}, подсчёт различных экзопланет по \texttt{o.exo\_id}. \\
+		4 & Subquery Join & В подзапросе повторяется соединение \texttt{obs2.observer\_id = o2.observer\_id}. \\
+		5 & Subquery Filter & В подзапросе выбирается целевой наблюдатель \texttt{Observer\_0000001}. \\
+		6 & Having & Отбор наблюдателей, у которых число различных экзопланет больше, чем у целевого наблюдателя. \\
+		7 & Sort & Сортировка результата по убыванию числа экзопланет и идентификатору наблюдателя. \\
 		\bottomrule
 	\end{tabularx}
 \end{table}
 
-Сначала материализуется вспомогательный набор с количеством различных экзопланет для каждого наблюдателя. Затем из него выбирается целевой наблюдатель, после чего остальные строки сравниваются с его значением; в результат попадают только наблюдатели с большим числом наблюдавшихся экзопланет.
+Запрос соединяет наблюдателей с наблюдениями по \texttt{observer\_id} и считает количество различных экзопланет для каждого наблюдателя. Во вложенном запросе по тому же соединению определяется количество экзопланет у целевого наблюдателя. Затем оператор \texttt{HAVING} оставляет только тех наблюдателей, у которых это количество больше.
 
 Фрагмент результата выполнения седьмого запроса приведён на рис. \ref{q7r}.
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.85\linewidth]{images/queries/q7r.png}
+	\includegraphics[width=1\linewidth]{images/queries/q7r.png}
 	\caption{Фрагмент результата выполнения седьмого запроса.}
 	\label{q7r}
 \end{figure}
@@ -1823,17 +1950,40 @@ ORDER BY t.tele_id, c.country;
 
 \[
 \begin{aligned}
-&\tau_{\mathrm{observations_count}\downarrow, \mathrm{tele_id}, \mathrm{country}}\Big(\
-&\quad \big(\mathrm{telescope} \times \operatorname{enum_range}(\mathrm{country_enum})\big)\
-&\quad \mathbin{\operatorname{LEFTJOIN}}*{\mathrm{tele_id, country}}
-\gamma*{\mathrm{tele_id, country; COUNT(*) \rightarrow observations_count}}\Big(\
-&\quad\quad \mathrm{observation}\
-&\quad\quad \bowtie_{\mathrm{observer_id}} \mathrm{observer}\
-&\quad\Big)\
-&\Big)
+&T =
+\lambda_{20}\Big(
+\tau_{\mathrm{telescope.tele\_id}}
+\big(\pi_{\mathrm{telescope.tele\_id}}(\mathrm{telescope})\big)
+\Big)
+\\
+\\
+&C =
+\lambda_{20}\Big(
+\tau_{\mathrm{observer.country}}
+\big(\pi_{\mathrm{observer.country}}(\mathrm{observer})\big)
+\Big)
+\\
+\\
+&\tau_{\mathrm{T.tele\_id,\ C.country}}\Big(\\
+&\gamma_{\mathrm{
+T.tele\_id,\ C.country;\ COUNT(observation.observation\_id) \rightarrow observations\_count
+}}\Big(
+\\
+&\quad
+(T \times C)
+\bowtie_{\mathrm{observer.country = C.country}}
+\mathrm{observer}
+\\
+&\quad
+\bowtie_{\mathrm{
+observation.observer\_id = observer.observer\_id
+\land
+observation.tele\_id = T.tele\_id
+}}
+\mathrm{observation}
+\Big)\Big)
 \end{aligned}
 \]
-
 
 Последовательность выполнения запроса приведена в табл. \ref{tab:q8plan}.
 
@@ -1846,24 +1996,24 @@ ORDER BY t.tele_id, c.country;
 		\toprule
 		Шаг & Операция & Описание \\
 		\midrule
-		1 & Materialized CTE & Формирование набора observed\_counts. \\
-		2 & Join & Соединение наблюдений с наблюдателями для получения страны. \\
-		3 & GroupAggregate & Подсчёт числа наблюдений для каждой пары телескоп--страна. \\
-		4 & Cross Join & Построение всех комбинаций телескопов и стран из перечисления country\_enum. \\
-		5 & Left Join & Присоединение фактических количеств наблюдений к полному набору комбинаций. \\
-		6 & Projection & Замена отсутствующих значений на 0 с помощью \texttt{COALESCE}. \\
-		7 & Sort & Сортировка по убыванию числа наблюдений, телескопу и стране. \\
+		1 & Limit & Выбор первых 20 телескопов из \texttt{telescope} после сортировки по \texttt{tele\_id}. \\
+		2 & Limit & Выбор первых 20 различных стран из \texttt{observer} после сортировки по \texttt{country}. \\
+		3 & Cross Join & Построение всех комбинаций выбранных телескопов и стран. \\
+		4 & Join & Соединение полученных стран с наблюдателями по условию \texttt{ob.country = c.country}. \\
+		5 & Join & Соединение с наблюдениями по двум условиям: \texttt{o.observer\_id = ob.observer\_id} и \texttt{o.tele\_id = t.tele\_id}. \\
+		6 & GroupAggregate & Группировка по \texttt{t.tele\_id} и \texttt{c.country}, подсчёт числа наблюдений. \\
+		7 & Sort & Сортировка результата по идентификатору телескопа и стране. \\
 		\bottomrule
 	\end{tabularx}
 \end{table}
 
-Вспомогательный набор сначала считает реальные наблюдения по парам телескоп--страна. Затем \texttt{CROSS JOIN} создаёт полный набор возможных пар из всех телескопов и всех стран, после чего внешнее соединение добавляет рассчитанные значения; для отсутствующих наблюдений используется ноль.
+Запрос сначала выбирает первые 20 телескопов по \texttt{tele\_id} и первые 20 стран по \texttt{country}. Затем \texttt{CROSS JOIN} строит все пары телескоп--страна. Каждая страна связывается с наблюдателями по \texttt{country}, после чего наблюдения присоединяются одновременно по \texttt{observer\_id} и \texttt{tele\_id}. В конце считается число наблюдений для каждой пары.
 
 Фрагмент результата выполнения восьмого запроса приведён на рис. \ref{q8r}.
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.85\linewidth]{images/queries/q8r.png}
+	\includegraphics[width=0.7\linewidth]{images/queries/q8r.png}
 	\caption{Фрагмент результата выполнения восьмого запроса.}
 	\label{q8r}
 \end{figure}
@@ -1901,7 +2051,7 @@ LIMIT 20;
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.85\linewidth]{images/queries/q9prep.png}
+	\includegraphics[width=0.7\linewidth]{images/queries/q9prep.png}
 	\caption{Результат запроса для подготовки к девятому запросу.}
 	\label{q9prep}
 \end{figure}
@@ -1939,7 +2089,7 @@ ORDER BY obs_date, observation_id;
 \begin{itemize}
   \item A --- TELE\_00056;
   \item B --- EXO\_021009;
-  \item C --- Observer\_000001 (как видно из рис. \ref{q9prep2}, у него сейчас нет этих наблюдений).
+  \item C --- Observer\_000001.
 \end{itemize}
 
 Текст запроса на SQL приведён в листинге \ref{lst:q9t}.
@@ -1955,7 +2105,7 @@ WHERE tele_id = 'TELE_00056'
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.85\linewidth]{images/queries/q9r1.png}
+	\includegraphics[width=0.7\linewidth]{images/queries/q9r1.png}
 	\caption{Результат выполнения девятого запроса.}
 	\label{q9r1}
 \end{figure}
@@ -1964,19 +2114,19 @@ WHERE tele_id = 'TELE_00056'
 
 \[
 \begin{aligned}
-&\pi_{\mathrm{observation_id, exo_id, tele_id; old_observer_id, new_observer_id, obs_date}}\Big(\
-&\quad \operatorname{UPDATE}*{\mathrm{observer_id} \leftarrow \mathrm{Observer_000001}}\Big(\
-&\quad\quad \sigma*{\mathrm{tele_id = TELE_00056 \land exo_id = EXO_021009 \land observer_id \neq Observer_000001}}\big(\mathrm{observation}\big)\
-&\quad\quad \setminus\
-\pi_{\operatorname{attrs}(\mathrm{observation})}\Big(\
-&\quad\quad\quad \sigma_{\mathrm{tele_id = TELE_00056 \land exo_id = EXO_021009}}\big(\mathrm{observation}\big)\
-&\quad\quad\quad \ \bowtie_{\mathrm{exo_id, tele_id, obs_date}}
-\sigma_{\mathrm{observer_id = Observer_000001}}\big(\mathrm{observation}\big)
-\Big)\Big)\
-&\Big)
+&\operatorname{UPDATE}_{\substack{
+\mathrm{observation.observer\_id \leftarrow}
+\mathrm{Observer\_000001}
+}}\Big(\\
+&\sigma_{\mathrm{
+observation.tele\_id = TELE\_00056
+\land
+observation.exo\_id = EXO\_021009
+}}
+(\mathrm{observation})
+\Big)
 \end{aligned}
 \]
-
 
 Последовательность выполнения запроса приведена в табл. \ref{tab:q9plan}.
 
@@ -1989,16 +2139,14 @@ WHERE tele_id = 'TELE_00056'
 		\toprule
 		Шаг & Операция & Описание \\
 		\midrule
-		1 & Filter & Отбор наблюдений телескопа TELE\_00056 за экзопланетой EXO\_021009. \\
-		2 & Anti Join & Проверка условия \texttt{NOT EXISTS}, чтобы после обновления не нарушить уникальность пары экзопланета--телескоп--наблюдатель--дата. \\
-		3 & CTE & Сохранение идентификаторов обновляемых строк и старых значений observer\_id. \\
-		4 & Update & Замена observer\_id на Observer\_000001 для выбранных строк. \\
-		5 & Returning & Вывод идентификатора наблюдения, старого наблюдателя, нового наблюдателя и даты наблюдения. \\
+		1 & Scan & Чтение таблицы \texttt{observation}. \\
+		2 & Filter & Отбор строк, где \texttt{tele\_id = 'TELE\_00056'} и \texttt{exo\_id = 'EXO\_021009'}. \\
+		3 & Update & Замена значения \texttt{observer\_id} на \texttt{Observer\_000001} в выбранных строках. \\
 		\bottomrule
 	\end{tabularx}
 \end{table}
 
-Запрос сначала формирует набор строк, которые нужно изменить, и отдельно запоминает старое значение наблюдателя. Проверка \texttt{NOT EXISTS} исключает строки, для которых обновление создало бы дубликат по ограничению уникальности. Затем выполняется обновление таблицы \texttt{observation}, а блок \texttt{RETURNING} показывает результат замены.
+Запрос работает только с таблицей \texttt{observation}. Он выбирает строки по двум условиям: заданный телескоп \texttt{TELE\_00056} и заданная экзопланета \texttt{EXO\_021009}. Для всех найденных строк поле \texttt{observer\_id} заменяется на \texttt{Observer\_000001}.
 
 Время выполнения запроса: 0.973 мс.
 
@@ -2007,7 +2155,7 @@ WHERE tele_id = 'TELE_00056'
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.85\linewidth]{images/queries/q9change.png}
-	\caption{Результат выполнения второго запроса (сравнение значений до и после).}
+	\caption{Сравнение значений до и после.}
 	\label{q9change}
 \end{figure}
 
@@ -2026,13 +2174,13 @@ WHERE tele_id = 'TELE_00056'
 ORDER BY obs_date, observation_id;
 \end{lstlisting}
 
-Как видно на рис. \ref{q9r}, значения в таблице действительно обновились.
+Как видно на рис. \ref{q9r2}, значения в таблице действительно обновились.
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.85\linewidth]{images/queries/q9r.png}
+	\includegraphics[width=0.85\linewidth]{images/queries/q9r2.png}
 	\caption{Проверка изменённых значений в таблице после девятого запроса.}
-	\label{q9r}
+	\label{q9r2}
 \end{figure}
 
 Время выполнения запроса: 1.093 мс.
@@ -2050,7 +2198,7 @@ ORDER BY obs_date, observation_id;
 
 Разработанная база данных может служить основой для хранения и анализа сведений об экзопланетах, связанных с ними астрономических объектах и событиях наблюдения. Полученная структура позволяет выполнять выборки по характеристикам экзопланет, телескопов, звёзд, галактик и наблюдателей, а также использовать накопленные данные для аналитических отчётов.
 
-Работа выполнялась на ноутбуке HP Pavilion Gaming Laptop 16-a0xxx с процессором Intel(R) Core(TM) i7-10750H CPU, 6 ядер, 2.60 ГГц, и 16 ГБ оперативной памяти. Запросы выполнялись в СУБД PostgreSQL; генерация данных реализована на языке Python, визуализация результатов выполнена средствами языка R. Среда разработки --- Visual Studio Code.
+% Работа выполнялась на ноутбуке HP Pavilion Gaming Laptop 16-a0xxx с процессором Intel(R) Core(TM) i7-10750H CPU, 6 ядер, 2.60 ГГц, и 16 ГБ оперативной памяти. Запросы выполнялись в СУБД PostgreSQL; генерация данных реализована на языке Python, визуализация результатов выполнена средствами языка R. Среда разработки --- Visual Studio Code.
 
 \newpage
 
